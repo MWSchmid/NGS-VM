@@ -1,0 +1,96 @@
+---
+# build indices for chromosomes - create folders
+- name: create index folders within the genome folder
+  file: path={{genomeFolder}}/{{item[0]}}/{{item[1]}} state=directory
+  with_nested:
+   - [ 'MmGRCm38dna', 'HsGRCh38dna', 'BtUMD31dna' ]
+   - [ 'subread', 'subreadColor', 'bowtie1', 'bowtie1Color', 'bowtie2', 'bwa', 'soap2', 'starGenome', 'starTranscriptome' ]
+
+- name: building a fasta index (used to create de novo headers)
+  command: samtools faidx genome.fa chdir={{genomeFolder}}/{{item}} creates=genome.fa.fai
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+
+- name: building indices for subread
+  command: subread-buildindex -F -M 24000 -o subread/index genome.fa chdir={{genomeFolder}}/{{item}} creates=subread/index.00.c.array
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: subread
+
+- name: building color indices for subread
+  command: subread-buildindex -c -F -M 24000 -o subreadColor/index genome.fa chdir={{genomeFolder}}/{{item}} creates=subreadColor/index.00.c.array
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: subread
+
+- name: building indices for bowtie1
+  command: bowtie-build --offrate 3 genome.fa bowtie1/index chdir={{genomeFolder}}/{{item}} creates=bowtie1/index.rev.2.ebwt
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: bowtie1
+  
+- name: building color indices for bowtie1
+  command: bowtie-build --color genome.fa bowtie1Color/index chdir={{genomeFolder}}/{{item}} creates=bowtie1Color/index.rev.2.ebwt
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: bowtie1
+
+- name: building indices for bowtie2
+  command: bowtie2-build --offrate 3 genome.fa bowtie2/index chdir={{genomeFolder}}/{{item}} creates=bowtie2/index.rev.2.bt2
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: bowtie2
+
+- name: building indices for bwa
+  command: bwa index -a bwtsw -p bwa/index genome.fa chdir={{genomeFolder}}/{{item}} creates=bwa/index.amb
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: bwa
+
+- name: building indices for soap2
+  command: 2bwt-builder genome.fa chdir={{genomeFolder}}/{{item}} creates=soap2/index.amb
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: soap2
+
+- name: moving soap2 indices
+  command: mv genome.fa.index.{{item[1]}} soap2/ chdir={{genomeFolder}}/{{item[0]}} creates=soap2/index.amb
+  with_nested:
+   - [ 'MmGRCm38dna', 'HsGRCh38dna', 'BtUMD31dna']
+   - [ 'amb', 'ann', 'bwt', 'fmv', 'hot', 'lkt', 'pac', 'rev.bwt', 'rev.fmv', 'rev.lkt', 'rev.pac', 'sa', 'sai' ]
+  when: soap2
+
+- name: building genome indices for star
+  command: STAR --runThreadN 4 --runMode genomeGenerate --genomeDir starGenome --genomeFastaFiles genome.fa chdir={{genomeFolder}}/{{item}} creates=starGenome/chrLength.txt
+  with_items:
+   - MmGRCm38dna
+   - HsGRCh38dna
+   - BtUMD31dna
+  when: star
+
+- name: building transcriptome indices for star
+  command: STAR --runThreadN 4 --runMode genomeGenerate --sjdbGTFfile {{genomeFolder}}/{{item.G}} --genomeDir starTranscriptome --genomeFastaFiles genome.fa chdir={{genomeFolder}}/{{item.F}} creates=starTranscriptome/chrLength.txt
+  with_items:
+   - { F: 'MmGRCm38dna', G: 'Mus_musculus.GRCm38.{{ensemblRelease}}.gtf' }
+   - { F: 'HsGRCh38dna', G: 'Homo_sapiens.GRCh38.{{ensemblRelease}}.gtf' }
+   - { F: 'BtUMD31dna', G: 'Bos_taurus.UMD3.1.{{ensemblRelease}}.gtf' }
+  when: star
+
+
+ 

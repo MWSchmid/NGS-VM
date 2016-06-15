@@ -1,0 +1,22 @@
+---
+
+- hosts: NGSVM
+  remote_user: "{{ uservar }}"
+  environment:
+    LC_CTYPE: "en_US.UTF-8"
+  vars:
+    genomeFolder: "/mnt/genomes/ensembl82"
+    ensemblRelease: 82
+    MmGRCm38dna: true
+    HsGRCh38dna: true
+    BtUMD31dna: true
+    subread: true
+    bowtie1: true
+    bowtie2: true
+    bwa: true
+    soap2: true
+    star: true
+   
+  roles:
+    - retrieveChromosomes
+    #- buildIndices

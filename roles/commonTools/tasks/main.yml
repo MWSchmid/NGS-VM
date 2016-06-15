@@ -1,0 +1,121 @@
+---
+# COMMON TOOLS
+- name: copy and unpack all tools
+  unarchive: src={{item}}.tar.gz dest=/home/{{setupFolder}} creates={{item}}
+  with_items:
+   - samtools
+   - bamtools
+   - bedtools
+   - bowtie1
+   - bowtie2
+   - bwa
+   - soapAligner
+   - soapBuilder
+   - star
+   - subread
+   - HTSeq
+   - RSEM
+   - Rcount
+   - multovl
+   - fastqc
+   - trimGalore
+   - bismark
+   - UCSC
+   - fqtrim
+
+- name: UCSC tools - copy only bedGraphToBigWig
+  command: cp bedGraphToBigWig /usr/local/bin chdir=/home/{{setupFolder}}/UCSC
+- name: UCSC tools - make bedGraphToBigWig executable
+  file: path=/usr/local/bin/bedGraphToBigWig state=touch mode="u+rx,g+rx,o+rx"
+
+- name: correct makefile of the soapBuilder
+  command: sed -i 's/makefile/Makefile/g' Makefile chdir=/home/{{setupFolder}}/soapBuilder
+
+- name: fastqc - change permissions to executable
+  file: path=/home/{{setupFolder}}/fastqc/fastqc state=touch mode="u+rx,g+rx,o+rx"
+- name: fastqc - create a link in /usr/local/bin
+  file: path=/usr/local/bin/fastqc src=/home/{{setupFolder}}/fastqc/fastqc state=link
+
+- name: compile with make
+  command: make chdir=/home/{{setupFolder}}/{{item}}
+  with_items:
+   - samtools
+   - bedtools
+   - bowtie1
+   - bowtie2
+   - bwa
+   - soapAligner
+   - soapBuilder
+   - star/source
+   - RSEM
+
+- name: subread - compile with make
+  command: make -f Makefile.Linux chdir=/home/{{setupFolder}}/subread/src
+
+- name: fqtrim - compile with make release
+  command: make release chdir=/home/{{setupFolder}}/fqtrim
+
+- name: copy with make install
+  command: make install chdir=/home/{{setupFolder}}/{{item}}
+  with_items:
+   - samtools
+   - bedtools
+   - bowtie1
+
+- name: copy all executables in dir to path
+  command: find ./ -maxdepth 1 -type f -perm /a+x -exec cp {} /usr/local/bin \; chdir=/home/{{setupFolder}}/{{item}}
+  with_items:
+   - bowtie2
+   - soapAligner
+   - soapBuilder
+   - star/source
+   - subread/bin
+   - RSEM
+   - Rcount
+   - trimGalore
+   - bismark
+   - fqtrim
+
+- name: bwa - copy specific bwa executable
+  command: cp bwa /usr/local/bin chdir=/home/{{setupFolder}}/bwa
+
+- name: HTSeq - build with python script
+  command: python setup.py build chdir=/home/{{setupFolder}}/HTSeq
+- name: HTSeq - install with python script
+  command: python setup.py install chdir=/home/{{setupFolder}}/HTSeq
+
+- name: bamtools - mkdir
+  file: path=/home/{{setupFolder}}/bamtools/build state=directory
+- name: bamtools - cmake
+  command: cmake .. chdir=/home/{{setupFolder}}/bamtools/build
+- name: bamtools - make
+  command: make chdir=/home/{{setupFolder}}/bamtools/build
+- name: bamtools - make install
+  command: make install chdir=/home/{{setupFolder}}/bamtools/build
+
+- name: multovl - mkdir
+  file: path=/home/{{setupFolder}}/multovl/build state=directory
+- name: multovl - cmake
+  command: cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/usr/include/boost -DBAMTOOLS_ROOT=/home/{{setupFolder}}/bamtools -DCMAKE_INSTALL_PREFIX=/usr/local/bin .. chdir=/home/{{setupFolder}}/multovl/build
+- name: multovl - make apps
+  command: make apps chdir=/home/{{setupFolder}}/multovl/build
+- name: multovl - make install
+  command: make install chdir=/home/{{setupFolder}}/multovl/build
+
+- name: cutadapt - install with pip
+  pip: name=cutadapt
+
+- name: pysam - install with pip
+  pip: name=pysam
+
+- name: ngslib - install with pip
+  pip: name=ngslib
+  
+- name: skidmarks - install with pip
+  pip: name=skidmarks
+
+- name: pyBigWig - install with pip
+  pip: name=pyBigWig
+
+- name: deepTools - install with pip
+  pip: name=deepTools

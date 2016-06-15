@@ -1,0 +1,59 @@
+---
+# download chromosomes from ensembl
+- name: create a folder for the genomes
+  file: path={{genomeFolder}}/{{item}} state=directory
+  with_items:
+   - MmGRCm38dna
+   #- MmGRCm38dnaRM
+   #- MmGRCm38dnaSM
+   - HsGRCh38dna
+   #- HsGRCh38dnaRM
+   #- HsGRCh38dnaSM
+   - BtUMD31dna
+   #- BtUMD31dnaRM
+   #- BtUMD31dnaSM
+
+- name: copy the shell script for genome downloads
+  copy: src=downloadGenome.sh dest={{genomeFolder}}
+
+- name: make the shell script executable
+  file: path={{genomeFolder}}/downloadGenome.sh state=touch mode="u+rx,g+rx,o+rx"
+
+- name: download gtfs
+  get_url: url=ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/gtf/{{item.dir}}/{{item.gtf}}.gz dest={{genomeFolder}}
+  with_items:
+   - {dir: "mus_musculus", gtf: "Mus_musculus.GRCm38.{{ensemblRelease}}.gtf"}
+   - {dir: "homo_sapiens", gtf: "Homo_sapiens.GRCh38.{{ensemblRelease}}.gtf"}
+   - {dir: "bos_taurus", gtf: "Bos_taurus.UMD3.1.{{ensemblRelease}}.gtf"}
+
+- name: unpack gtfs
+  command: gunzip {{item}}.gz -k chdir={{genomeFolder}} creates={{item}}
+  with_items:
+   - Mus_musculus.GRCm38.{{ensemblRelease}}.gtf
+   - Homo_sapiens.GRCh38.{{ensemblRelease}}.gtf
+   - Bos_taurus.UMD3.1.{{ensemblRelease}}.gtf
+
+- name: retrieving MmGRCm38
+  command: sh {{genomeFolder}}/downloadGenome.sh -R {{item.R}} -I {{item.I}} -N {{item.N}} -F {{item.F}} -P {{item.P}} creates={{item.F}}/{{item.P}}.fa
+  with_items:
+   - {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/mus_musculus/dna", I: "Mus_musculus.GRCm38.dna", N: "19", F: "{{genomeFolder}}/MmGRCm38dna", P: "genome"}
+   #- {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/mus_musculus/dna", I: "Mus_musculus.GRCm38.dna_rm", N: "19", F: "{{genomeFolder}}/MmGRCm38dnaRM", P: "genome"}
+   #- {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/mus_musculus/dna", I: "Mus_musculus.GRCm38.dna_sm", N: "19", F: "{{genomeFolder}}/MmGRCm38dnaSM", P: "genome"}
+  when: MmGRCm38dna
+
+- name: retrieving HsGRCh38
+  command: sh {{genomeFolder}}/downloadGenome.sh -R {{item.R}} -I {{item.I}} -N {{item.N}} -F {{item.F}} -P {{item.P}} creates={{item.F}}/{{item.P}}.fa
+  with_items:
+   - {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/homo_sapiens/dna", I: "Homo_sapiens.GRCh38.dna", N: "22", F: "{{genomeFolder}}/HsGRCh38dna", P: "genome"}
+   #- {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/homo_sapiens/dna", I: "Homo_sapiens.GRCh38.dna_rm", N: "22", F: "{{genomeFolder}}/HsGRCh38dnaRM", P: "genome"}
+   #- {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/homo_sapiens/dna", I: "Homo_sapiens.GRCh38.dna_sm", N: "22", F: "{{genomeFolder}}/HsGRCh38dnaSM", P: "genome"}
+  when: HsGRCh38dna
+
+- name: retrieving BtUMD31
+  command: sh {{genomeFolder}}/downloadGenome.sh -R {{item.R}} -I {{item.I}} -N {{item.N}} -F {{item.F}} -P {{item.P}} creates={{item.F}}/{{item.P}}.fa
+  with_items:
+   - {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/bos_taurus/dna", I: "Bos_taurus.UMD3.1.dna", N: "29", F: "{{genomeFolder}}/BtUMD31dna", P: "genome"}
+   #- {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/bos_taurus/dna", I: "Bos_taurus.UMD3.1.dna_rm", N: "29", F: "{{genomeFolder}}/BtUMD31dnaRM", P: "genome"}
+   #- {R: "ftp://ftp.ensembl.org/pub/release-{{ensemblRelease}}/fasta/bos_taurus/dna", I: "Bos_taurus.UMD3.1.dna_sm", N: "29", F: "{{genomeFolder}}/BtUMD31dnaSM", P: "genome"}
+  when: BtUMD31dna
+

@@ -1,0 +1,32 @@
+---
+# BIOCONDUCTOR TOOLS
+- name: copy the R installer script
+  copy: src=installer.R dest=/home/{{setupFolder}}
+
+- name: run the R installer script
+  command: Rscript --slave --no-save --no-restore-history /home/{{setupFolder}}/installer.R {{item}}
+  register: biocresult
+  failed_when: "biocresult.rc != 0 or 'had non-zero exit status' in biocresult.stderr"
+  changed_when: "'Added' in biocresult.stdout"
+  with_items:
+   - bioconductor
+   - RCurl
+   - biomaRt
+   - edgeR
+   - DESeq
+   - snow
+   - gtools
+   - gplot
+   - caTools
+   - colorRamps
+   - topGO
+   - DBChIP
+   - BayesPeak
+   - ChIPpeakAnno
+   - ChIPseeker
+   - Rsubread
+   - DESeq2
+   - clusterProfiler
+   - derfinder
+   - ChIPQC
+

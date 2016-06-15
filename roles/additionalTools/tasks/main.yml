@@ -1,0 +1,101 @@
+---
+# ADDITIONAL TOOLS
+- name: copy and unpack tools
+  unarchive: src={{item}}.tar.gz dest=/home/{{setupFolder}} creates={{item}}
+  with_items:
+   - phantompeakqualtools
+   - MAnorm
+   - CEAS
+   - MACS
+   - SICER
+
+- name: copy and unpack tools directly used by the user
+  unarchive: src={{item}}.tar.gz dest=/home/{{uservar}} creates={{item}} owner={{uservar}} group={{uservar}}
+  with_items:
+   - GEM
+   - PeakAnalyzer
+   - jChIP
+   - PAPST
+   - picard
+   - htsjdk
+   - trimmomatic
+
+- name: picard - move htsjdk
+  command: mv htsjdk picard/ chdir=/home/{{uservar}} creates=picard/htsjdk
+- name: picard - build
+  command: ant chdir=/home/{{uservar}}/picard
+- name: picard - change ownership
+  file: path=/home/{{uservar}}/picard owner={{uservar}} group={{uservar}} state=directory recurse=yes
+
+- name: copy SPP
+  copy: src=SPP.tar.gz dest=/home/{{setupFolder}}
+- name: install SPP
+  command: R CMD INSTALL SPP.tar.gz chdir=/home/{{setupFolder}}
+
+# phantopeakqualtools and the newer version of spp don't work together - there is an unused argument...
+- name: modifying script files
+  command: sed -i {{item.command}} {{item.file}} chdir=/home/{{setupFolder}}/{{item.tool}}
+  with_items:
+   - { tool: "phantompeakqualtools", command: "'1i#!/usr/bin/env Rscript'", file: "run_spp.R" }
+   - { tool: "phantompeakqualtools", command: "'1i#!/usr/bin/env Rscript'", file: "run_spp_nodups.R" }
+   - { tool: "phantompeakqualtools", command: "'s+,npeaks=iparams$npeak++g'", file: "run_spp.R" }
+   - { tool: "phantompeakqualtools", command: "'s+,npeaks=iparams$npeak++g'", file: "run_spp_nodups.R" }
+   - { tool: "MAnorm", command: "'1i#!/bin/bash'", file: "MAnorm.sh" }
+
+- name: making scripts executable
+  file: path=/home/{{setupFolder}}/{{item.tool}}/{{item.file}} state=touch mode="u+rx,g+rx,o+rx"
+  with_items:
+   - { tool: "phantompeakqualtools", file: "run_spp.R" }
+   - { tool: "phantompeakqualtools", file: "run_spp_nodups.R" }
+   - { tool: "MAnorm", file: "MAnorm.sh" }
+
+- name: copying scripts
+  command: cp {{item.file}} /usr/local/bin chdir=/home/{{setupFolder}}/{{item.tool}}
+  with_items:
+   - { tool: "phantompeakqualtools", file: "run_spp.R" }
+   - { tool: "phantompeakqualtools", file: "run_spp_nodups.R" }
+   - { tool: "MAnorm", file: "MAnorm.sh" }
+   - { tool: "MAnorm", file: "MAnorm.r" }
+
+- name: MACS - installing with python script
+  command: python setup_w_cython.py install chdir=/home/{{setupFolder}}/MACS
+- name: MACS - changing permissions
+  file: path=/home/{{setupFolder}}/MACS/bin/{{item}} state=touch mode="u+rx,g+rx,o+rx"
+  with_items:
+   - macs2
+   - macs2diff
+   - MCMCPostPoisRatios
+   - MLEPostPoisRatios
+- name: MACS - copying binaries
+  command: find ./ -maxdepth 1 -type f -perm /a+x -exec cp {} /usr/local/bin \; chdir=/home/{{setupFolder}}/MACS/bin
+- name: MACS - copy python library
+  command: cp -R build/lib.linux-x86_64-2.7/MACS2 /usr/local/lib/python2.7/site-packages chdir=/home/{{setupFolder}}/MACS
+
+- name: CEAS - installing with python script
+  command: python setup.py install chdir=/home/{{setupFolder}}/CEAS
+
+# keep SICER separated from MAnorm and phantompeakqualtools
+# delegating to user might be better
+- name: SICER - modify scripts
+  command: sed -i 's+/home/data/SICER1.1+/usr/local/bin+g' {{item}} chdir=/home/{{setupFolder}}/SICER
+  with_items:
+   - SICER/SICER-df-rb.sh
+   - SICER/SICER-df.sh
+   - SICER/SICER-rb.sh
+   - SICER/SICER.sh
+- name: SICER - making scripts executable
+  file: path=/home/{{setupFolder}}/SICER/{{item}} state=touch mode="u+rx,g+rx,o+rx"
+  with_items:
+   - SICER/SICER-df-rb.sh
+   - SICER/SICER-df.sh
+   - SICER/SICER-rb.sh
+   - SICER/SICER.sh
+- name: SICER - copy entire folder
+  command: cp -R SICER /usr/local/bin chdir=/home/{{setupFolder}}/SICER
+- name: SICER - create links
+  file: src=/usr/local/bin/SICER/{{item}} dest=/usr/local/bin/{{item}} state=link
+  with_items:
+   - SICER-df-rb.sh
+   - SICER-df.sh
+   - SICER-rb.sh
+   - SICER.sh

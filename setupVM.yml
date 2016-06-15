@@ -1,0 +1,19 @@
+---
+
+- hosts: NGSVM
+  remote_user: "{{ uservar }}"
+  sudo: true
+  sudo_user: root
+  vars:
+    setupFolder: "setup"
+  environment:
+    #https_proxy: http://proxy.uzh.ch:3128
+    #http_proxy: http://proxy.uzh.ch:3128
+    #ftp_proxy: http://proxy.uzh.ch:3128
+    LC_CTYPE: "en_US.UTF-8"
+
+  roles:
+    - basicDependencies
+    - commonTools
+    - bioconductorTools
+    - additionalTools

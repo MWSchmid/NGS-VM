@@ -1,0 +1,56 @@
+---
+# BASIC DEPENDENCIES
+# SET LC_CTYPE="en_US.UTF-8"
+#- name: upgrade all existing packages
+#  apt: upgrade=dist
+
+- name: add R repos
+  apt_repository: repo='{{item}} http://stat.ethz.ch/bin/linux/ubuntu trusty/' state=present
+  with_items:
+    - deb
+    - deb-src
+
+- name: add R key
+  apt_key: keyserver=keyserver.ubuntu.com id=E084DAB9
+  
+- name: update package list
+  apt: update_cache=yes
+
+- name: install basic dependencies
+  apt: name={{item}} state=present
+  with_items:
+   - build-essential
+   - cmake
+   - unzip
+   - zlibc
+   - zlib1g
+   - zlib1g-dev
+   - pigz
+   - libncurses5-dev
+   - python2.7-dev
+   - python-numpy
+   - python-matplotlib
+   - python-pip
+   - sqlite
+   - libsqlite-dev
+   - librsvg2-bin
+   - r-base
+   - r-base-dev
+   - r-cran-rsqlite
+   - curl
+   - libcurl4-openssl-dev
+   - libxml2-dev
+   - libboost-all-dev
+   - cython
+   - python-setuptools
+   - java-common
+   - openjdk-7-jdk
+   - ant
+   - qt-sdk
+   - smbclient
+   - cifs-utils
+   - screen
+   - libfreetype6
+
+- name: create a setup folder owned by root
+  file: path=/home/{{setupFolder}} state=directory
