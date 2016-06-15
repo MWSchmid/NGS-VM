@@ -1,7 +1,7 @@
 # NGS-VM
 Deploy a machine for NGS data analysis.
 
-Note: I used this playbook to setup my NGS VMs on the ScienceCloud at the UZH. The instructions below are working on to this specific infrastructure. Important: Ansible is not yet compatible with Python 3. Ubuntu 16.04 does not have Python 2.7 pre-installed anymore. If you want to use Ubuntu 16.04, you need to either write a [workaround](https://groups.google.com/forum/#!topic/ansible-project/DUKzTho3OCI) in Ansible, or modify the machine manually before running the playbook. Below I used Ubuntu 14.04. The default-user is called "ubuntu" and there is no password (needs to be added on machines with a password).
+Note: I used this playbook to setup my NGS VMs on the ScienceCloud at the UZH. The instructions below are working on this specific infrastructure. Important: Ansible is not yet compatible with Python 3. Ubuntu 16.04 does not have Python 2.7 pre-installed anymore. If you want to use Ubuntu 16.04, you need to either write a [workaround](https://groups.google.com/forum/#!topic/ansible-project/DUKzTho3OCI) in Ansible, or modify the machine manually before running the playbook. Below I used Ubuntu 14.04 (server). The default-user is called "ubuntu" and there is no password (needs to be added on machines with a password).
 
 Warning: I tested the VM-setup in June 2016 (I did the first version end of 2015). I had to update two packages (SPP and MULTOVL) and still need to check/test whether the updates have an effect on the functionality (phantompeakqualtools requires SPP). In general, some parts may become outdated in relatively short time... Another thing one could think of is to set the version number of the packages which are directly downloaded with pip.
 
@@ -53,7 +53,7 @@ exit
 
 All the files generated during the setup are located under "/home/setup". Most important binaries were moved to "/usr/local/bin" - except for the UCSC tools which can be found under "/home/setup/UCSC".
 
-
+Finally, some [generic examples](genericExamples.md) for some tasks.
 
 
 
