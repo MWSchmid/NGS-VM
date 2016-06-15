@@ -5,7 +5,7 @@
 #  apt: upgrade=dist
 
 - name: add R repos
-  apt_repository: repo='{{item}} http://stat.ethz.ch/bin/linux/ubuntu trusty/' state=present
+  apt_repository: repo='{{item}} http://cran.rstudio.com/bin/linux/ubuntu trusty/' state=present
   with_items:
     - deb
     - deb-src
