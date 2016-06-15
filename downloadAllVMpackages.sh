@@ -169,4 +169,7 @@ else
 fi
 done
 
-
+# UCSC tools...
+mkdir -p $OUTDIR/UCSC
+wget -P UCSC ftp://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/\*
+tar -czf $OUTDIR/repacked/UCSC.tar.gz -C $OUTDIR UCSC
