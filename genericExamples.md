@@ -1,6 +1,6 @@
-# Preprocessing
+## Preprocessing
 
-## Nucleotide-encoded single-end
+### Nucleotide-encoded single-end
 ```sh
 ## SE reads
 INDIR="/path/to/fastq/files"
@@ -10,7 +10,7 @@ FASTQFILE="${PREFIX}_R1.fastq.gz"
 ./preprocessIlluminaFastq_SE.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE
 ```
 
-## Nucleotide-encoded paired-end
+### Nucleotide-encoded paired-end
 ```sh
 INDIR="/path/to/fastq/files"
 OUTDIR="$HOME/prepro"
@@ -20,9 +20,9 @@ FASTQFILEREVERSE="${PREFIX}_R2.fastq.gz"
 ./preprocessIlluminaFastq_PE.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE $FASTQFILEREVERSE
 ```
 
-# Remove contaminations
+## Remove contaminations
 
-## Nucleotide-encoded single-end
+### Nucleotide-encoded single-end
 ```sh
 INDIR="$HOME/prepro"
 OUTDIR="$HOME/prepro"
@@ -34,7 +34,7 @@ PR_INDEX="/path/to/all/protozoa/bowtie2/index"
 ./removeContaminationIllumina.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE $BA_INDEX $FU_INDEX $PR_INDEX
 ```
 
-## Nucleotide-encoded paired-end
+### Nucleotide-encoded paired-end
 ```sh
 INDIR="$HOME/prepro"
 OUTDIR="$HOME/prepro"
@@ -60,9 +60,9 @@ FASTQFILEREVERSE="${PREFIX}_R2_paired.noCont.fq.gz"
 ./mergeAndSortSplitPEreads.sh $INDIR $OUTDIR $PREFIX $FASTQFILE $FASTQFILEREVERSE
 ```
 
-# Check the read numbers after the preprocessing
+## Check the read numbers after the preprocessing
 
-## Single-end reads
+### Single-end reads
 ```sh
 ALLSAMPLES=("mySample_A" "mySample_B")
 READS="/path/to/fastq/files"
@@ -77,13 +77,13 @@ awk '{printf "%s\t", $0; if (NR%5==0) {printf "\n"}}' readCountsX4.txt > readCou
 # note that the numbers have to be devided by 4!
 ```
 
-## Paired-end reads
+### Paired-end reads
 ```sh
 ```
 
-# Align reads
+## Align reads
 
-## DNA-Seq single-end (only unique alignments)
+### DNA-Seq single-end (only unique alignments)
 ```sh
 INDIR="$HOME/prepro"
 OUTDIR="$HOME/prepro"
@@ -93,7 +93,7 @@ GENOME_INDEX="/path/to/a/genome/bowtie2/index"
 ./alignIlluminaWithBowtie2_SE.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE $GENOME_INDEX
 ```
 
-## DNA-Seq paired-end (only unique alignments)
+### DNA-Seq paired-end (only unique alignments)
 ```sh
 INDIR="$HOME/prepro"
 OUTDIR="$HOME/prepro"
@@ -104,7 +104,7 @@ GENOME_INDEX="/path/to/a/genome/bowtie2/index"
 ./alignIlluminaWithBowtie2_PE.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE $FASTQFILEREVERSE $GENOME_INDEX
 ```
 
-## RNA-Seq single-end
+### RNA-Seq single-end
 Subjunc, per default with up to 10 alignments per read. If only unique, then add --unique.
 ```sh
 INDIR=""
@@ -115,7 +115,7 @@ GENOME_INDEX="/path/to/a/genome/subread/index"
 ./alignWithSubjunc_SE.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE $GENOME_INDEX
 ```
 
-## RNA-Seq paired-end
+### RNA-Seq paired-end
 Subjunc, per default with up to 10 alignments per read. If only unique, then add --unique.
 ```sh
 INDIR=""
@@ -127,9 +127,9 @@ GENOME_INDEX="/path/to/a/genome/subread/index"
 ./alignWithSubjunc_PE.sh -t 14 $INDIR $OUTDIR $PREFIX $FASTQFILE $FASTQFILEREVERSE $GENOME_INDEX
 ```
 
-# Bam to bigWig conversions (for genome-browsers)
+## Bam to bigWig conversions (for genome-browsers)
 
-## Regular bigWig
+### Regular bigWig
 ```sh
 INDIR=""
 OUTDIR=""
@@ -138,7 +138,7 @@ BAMFILE=""
 ./bamToBigWig.sh $INDIR $OUTDIR $PREFIX $BAMFILE
 ```
 
-## Normalized bigWig
+### Normalized bigWig
 I'm a bit sceptical about those - I have the feeling that the normalization is prone to outliers. Customers really like them though...
 ```sh
 INDIR=""
@@ -149,9 +149,9 @@ MAPPABLE_GENOME="2150570000" # that's for example mm9 - see help
 ./bamTo1xNormalizedBigWig.sh-t 14 $INDIR $OUTDIR $PREFIX $BAMFILE $MAPPABLE_GENOME
 ```
 
-# ChIP-Seq
+## ChIP-Seq
 
-## Quality-check with Phantompeakqualtools
+### Quality-check with Phantompeakqualtools
 ```sh
 INDIR=""
 OUTDIR=""
@@ -160,7 +160,7 @@ BAMFILE=""
 ./ChIPseq_ppqt.sh -t 14 $INDIR $OUTDIR $PREFIX $BAMFILE
 ```
 
-## Peak identification with MACS2
+### Peak identification with MACS2
 ```sh
 INDIR=""
 OUTDIR=""
@@ -172,7 +172,7 @@ MAPPABLE_GENOME="mm" # can also be a number - check help of macs2
 # Note: for easier handling of project with and without controls, a $BAMFILECONTROL file starting with "none" will be ignored.
 ```
 
-## Peak identification with SICER
+### Peak identification with SICER
 ```sh
 INDIR=""
 OUTDIR=""
@@ -182,7 +182,7 @@ BAMFILECONTROL="" # optional
 ./ChIPseq_sicer.sh -t 14 [-c $BAMFILECONTROL] $INDIR $OUTDIR $PREFIX $BAMFILE
 ```
 
-## Peak identification with home-made Runs-Test
+### Peak identification with home-made Runs-Test
 There is absolutely no warranty for this approach. It may only be used with very broad and diffuse signals. It essentially takes the difference between two normalized bigWigs and searches for significant streches with only negative or positive values. I included an example figure at the bottom.
 ```sh
 sudo cp ./runsTestChXPseq.py /usr/local/bin/
@@ -197,7 +197,7 @@ BIGWIGCONTROLFILE="" # needs to be normalized
 ./ChIPseq_runsTest.sh -t 14 [-c $BAMFILECONTROL] $INDIR $OUTDIR $PREFIX $BAMFILE
 ```
 
-## Count reads per region - THIS IS NOT FOR RNA-SEQ!
+### Count reads per region - THIS IS NOT FOR RNA-SEQ!
 ```sh
 INDIR=""
 OUTDIR=""
@@ -212,7 +212,7 @@ BAMDIR="/path/to/bam/files"
 ./countReadsPerFlatRegion.sh -t 14 $INDIR $OUTDIR $PREFIX $PEAKFILE $BAMDIR/*.bam
 ```
 
-# Figures
+## Figures
 
 ![runsTestExample](runsTestExample.png)
-*Figure 1* Example illustrating the custom-made Runs-Test.
+**Figure 1:** Example illustrating the custom-made Runs-Test.
