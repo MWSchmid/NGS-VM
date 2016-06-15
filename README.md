@@ -21,7 +21,7 @@ cd NGS-VM
 # download all tools
 sh downloadAllVMpackages.sh
 # move the packages to the right place
-for ARCHIVE in bamtools bedtools bismark bowtie1 bowtie2 bwa fastqc fqtrim HTSeq multovl Rcount RSEM samtools soapAligner soapBuilder star subread trimGalore; do
+for ARCHIVE in bamtools bedtools bismark bowtie1 bowtie2 bwa fastqc fqtrim HTSeq multovl Rcount RSEM samtools soapAligner soapBuilder star subread trimGalore UCSC; do
 mv repacked/$ARCHIVE.tar.gz roles/commonTools/files/
 done
 for ARCHIVE in CEAS GEM htsjdk jChIP MACS MAnorm PAPST PeakAnalyzer phantompeakqualtools picard SICER SPP trimmomatic; do
