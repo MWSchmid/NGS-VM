@@ -1,3 +1,5 @@
+All examples assume that you are in the directory "shellWrappers"
+
 ## Preprocessing
 
 ### Nucleotide-encoded single-end
@@ -74,10 +76,6 @@ zcat $READS/${PREFIX}.noCont.fq.gz | wc -l >> readCountsX4.txt
 done
 awk '{printf "%s\t", $0; if (NR%5==0) {printf "\n"}}' readCountsX4.txt > readCountsX4wide.txt
 # note that the numbers have to be devided by 4!
-```
-
-### Paired-end reads
-```sh
 ```
 
 ## Align reads
