@@ -37,7 +37,7 @@ done
 ```sh
 ssh-add /path/to/my/private/key.pem
 ```
-4. Edit the [playbook](setupVM.yml) if necessary (you can for example disable some of the roles) and start the deployment process:
+4. Edit [setupVM.yml](setupVM.yml) if necessary (you can for example disable some of the roles) and start the deployment process:
 ```sh
 ansible-playbook setupVM.yml -i hosts -e "uservar=ubuntu"
 ```
