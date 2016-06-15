@@ -51,6 +51,7 @@
    - cifs-utils
    - screen
    - libfreetype6
+   - libfreetype6-dev
 
 - name: create a setup folder owned by root
   file: path=/home/{{setupFolder}} state=directory
