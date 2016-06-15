@@ -2,7 +2,6 @@
 
 ### Nucleotide-encoded single-end
 ```sh
-## SE reads
 INDIR="/path/to/fastq/files"
 OUTDIR="$HOME/prepro"
 PREFIX="mySample_A"
