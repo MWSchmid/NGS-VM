@@ -1,4 +1,8 @@
-**All examples assume that you are in the directory "shellWrappers"**
+**All examples assume that you are in the directory "shellWrappers". The first time you likely need to:**
+```sh
+cd shellWrappers
+sudo chmod 755 *
+```
 
 
 
