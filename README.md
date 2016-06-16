@@ -9,15 +9,15 @@ While testing it again, building picard failed. Will be fixed in the next days.
 
 ## Requirements
 
-1. Install dependencies:
+* Install dependencies:
 ```sh
 sudo apt-get install git curl ansible ssh
 ```
-2. Clone the repository:
+* Clone the repository:
 ```sh
 git clone https://github.com/MWSchmid/NGS-VM
 ```
-3. GitHub is not meant to store large files just for convenience. You therefore have to download all the packages yourself. This is only required once but it is also prone to "update-errors". The script I provided contains links to all the packages which can be quickly outdated (the errors will normally result in "tar: Unrecognized archive format"). You eventually need to change some of the links in future. However, this may also change the requirements in general.
+* GitHub is not meant to store large files just for convenience. You therefore have to download all the packages yourself. This is only required once but it is also prone to "update-errors". The script I provided contains links to all the packages which can be quickly outdated (the errors will normally result in "tar: Unrecognized archive format"). You eventually need to change some of the links in future. However, this may also change the requirements in general.
 ```sh
 cd NGS-VM
 # download all tools
