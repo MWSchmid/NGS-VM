@@ -138,7 +138,6 @@ BAMFILE=""
 ```
 
 ### Normalized bigWig
-I'm a bit sceptical about those - I have the feeling that the normalization is prone to outliers. Customers really like them though...
 ```sh
 INDIR=""
 OUTDIR=""
