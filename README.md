@@ -33,17 +33,17 @@ done
 
 ## Deploy a VM
 
-1. Launch a VM
-2. Replace the IP in [hosts](hosts) with the one from the VM. To deploy more VMs at once, just add the other IPs in this file as well.
-3. If not done yet, do:
+* Launch a VM
+* Replace the IP in [hosts](hosts) with the one from the VM. To deploy more VMs at once, just add the other IPs in this file as well.
+* If not done yet, do:
 ```sh
 ssh-add /path/to/my/private/key.pem
 ```
-4. Edit [setupVM.yml](setupVM.yml) if necessary (you can for example disable some of the roles) and start the deployment process:
+* Edit [setupVM.yml](setupVM.yml) if necessary (you can for example disable some of the roles) and start the deployment process:
 ```sh
 ansible-playbook setupVM.yml -i hosts -e "uservar=ubuntu"
 ```
-5. To enable other users on the VM, log into the VM and remove some user specific files:
+* To enable other users on the VM, log into the VM and remove some user specific files:
 ```sh
 ssh ubuntu@172.23.xxx.xxx
 sudo rm /var/lib/cloud/data/*
