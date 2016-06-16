@@ -1,4 +1,6 @@
-All examples assume that you are in the directory "shellWrappers"
+**All examples assume that you are in the directory "shellWrappers"**
+
+
 
 ## Preprocessing
 
