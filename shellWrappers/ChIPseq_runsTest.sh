@@ -33,6 +33,10 @@ winLen=1000
 winType="flat"
 fragSize=1000000
 minFragSize=1000
+subWins=5
+baseSteps=25
+pCut=0.00001
+diffCut=1
 threads=1
 memory=4
 maxMem=4
@@ -85,16 +89,21 @@ OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.RT.<winL
 BIGWIGFILE_TEST: Name of the normalized bigWig file of the test sample.
 BIGWIGFILE_CONTROL: Name of the normalized bigWig file of the control sample.
 Options:
-  -v            Enable verbose logging (no effect)
-  -h            Print this help text
-  -t		Number of available threads (no effect)
-  -m            Amount of memory to be allocated (per core, in GB)
+  -v        enable verbose logging (no effect)
+  -h        print this help text
+  -t		number of available threads (no effect)
+  -m        amount of memory to be allocated (per core, in GB)
   -s		path to the runsTestChXPseq.py script
   -p		path to the processChXPrunsTest.R script
-  -l            size of the smoothing window (default: 1'000 bp)
+  -l        size of the smoothing window (default: 1'000 bp)
   -w		type of the smoothing window (default: flat, i.e. moving average)
   -f		initial fragment size (default: 1'000'000 bp)
   -d		minimal fragment size (default: 1'000 bp)
+  -u        number of segments a windows is split into (default: 5)
+  -b        take only every Xth base (default: 25)
+  -q        cutoff for the P-value (default: 0.00001)
+  -c        cutoff for the LFC (default: 1)
+
 Dependencies:
 sudo easy_install ngslib
 sudo pip install skidmarks
@@ -148,8 +157,8 @@ remove_if_present () {
 
 ## parse command-line
 
-short_opts='hvt:m:s:p:l:w:f:d:'
-long_opts='help,verbose,threads,memory,script,postProcScript,winLen,winType,fragSize,minFragSize'
+short_opts='hvt:m:s:p:l:w:f:d:u:b:q:c:'
+long_opts='help,verbose,threads,memory,script,postProcScript,winLen,winType,fragSize,minFragSize,subWins,baseSteps,pCut,diffCut'
 
 getopt -T > /dev/null
 rc=$?
@@ -178,8 +187,12 @@ while [ $# -gt 0 ]; do
         --winLen|-l)   shift; winLen=$1 ;;
         --postProcScript|-p)   shift; postProcSript=$1 ;;
         --script|-s)   shift; runsTestScript=$1 ;;
-	--threads|-t)  shift; threads=$1 ;;
-	--memory|-m)   shift; memory=$1 ;;	
+        --subWins|-u)  shift; subWins=$1 ;;
+        --baseSteps|-b)shift; baseSteps=$1 ;;
+        --pCut|-q)     shift; pCut=$1 ;;
+        --diffCut|-c)  shift; diffCut=$1 ;;
+        --threads|-t)  shift; threads=$1 ;;
+        --memory|-m)   shift; memory=$1 ;;	
         --verbose|-v)  verbose='--verbose' ;;
         --help|-h)     usage; exit 0 ;;
         --)            shift; break ;;
@@ -216,13 +229,14 @@ input_exists ${inputDir}/${inputFileReference}
 input_exists ${postProcScript}
 
 # run script
-command="${runsTestScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReference} ${winLen} ${winType} ${fragSize} ${minFragSize} > ${outputDir}/${prefix}.RT.${winLen}.txt"
+outfileName="${prefix}.RT.${winLen}_${winType}_${fragSize}_${minFragSize}_${subWins}_${baseSteps}_${pCut}_${diffCut}"
+command="${runsTestScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReference} ${winLen} ${winType} ${fragSize} ${minFragSize} --subWins ${subWins} --baseSteps ${baseSteps} --pCut ${pCut} --diffCut ${diffCut} > ${outputDir}/${outfileName}.txt"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
 echo "=== ${me}: Command ended with exit code $rc"
 
-command="Rscript ${postProcScript} ${outputDir}/${prefix}.RT.${winLen}.txt ${outputDir}/${prefix}.RT.${winLen}.bed ${inputFile//.bw} ${inputFileReference//.bw}"
+command="Rscript ${postProcScript} ${outputDir}/${outfileName}.txt ${outputDir}/${outfileName}.bed ${inputFile//.bw} ${inputFileReference//.bw}"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
@@ -230,8 +244,8 @@ echo "=== ${me}: Command ended with exit code $rc"
 #awk -v OFS="\t" -v TST=${inputFile//.bw} -v CNT=${inputFileReference//.bw} '{if ($5 < 0) {print $1,$2,$3,CNT,$5} else {print $1,$2,$3,TST,$5} }' ${outputDir}/${prefix}.RT.${winLen}.txt > ${outputDir}/${prefix}.RT.${winLen}.bed
 
 ## Checking output
-output_exists "${outputDir}/${prefix}.RT.${winLen}.txt"
-output_exists "${outputDir}/${prefix}.RT.${winLen}.bed"
+output_exists "${outputDir}/${outfileName}.txt"
+output_exists "${outputDir}/${outfileName}.bed"
 
 ## All done.
 echo "=== ${me}: Script done at `date '+%Y-%m-%d %H:%M:%S'`."

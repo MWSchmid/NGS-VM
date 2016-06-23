@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 usage:
-python runsTestChXPseq.py bwTest bwControl winLen winType fragSize minWinSize
+python runsTestChXPseq.py bwTest bwControl winLen winType fragSize minWinSize [--subWins 5] [--baseSteps 25] [--pCut 0.00001] [--diffCut 1]
 
 install dependencies:
 sudo easy_install ngslib
@@ -20,6 +20,12 @@ arguments:
 \t\tnote: flat is a moving average
 \t-fragSize: the original fragment size (e.g. 1000000)
 \t-minWinSize: the minimal window size (e.g. 1000)
+
+optional arguments:
+--subWins (5): number of segments a windows is split into
+--baseSteps (25): take only every Xth base
+--pCut (0.00001): cutoff for the P-value
+--diffCut (1): cutoff for the LFC
 
 notes:
 \t-the bigWigs need to be normalized:
@@ -40,6 +46,11 @@ try:
 except:
     print >> sys.stderr, __doc__
     sys.exit(1)
+
+COMPsubWins = int(sys.argv[sys.argv.index("--subWins")+1]) if "--subWins" in sys.argv else int(5)
+COMPbaseSteps = int(sys.argv[sys.argv.index("--baseSteps")+1]) if "--baseSteps" in sys.argv else int(25)
+COMPpCutoff = float(sys.argv[sys.argv.index("--pCut")+1]) if "--pCut" in sys.argv else float(.00001)
+COMPdiffCutoff = float(sys.argv[sys.argv.index("--diffCut")+1]) if "--diffCut" in sys.argv else int(1)
 
 import wWigIO
 from ngslib import BigWigFile
@@ -239,6 +250,9 @@ if __name__ == "__main__":
                 reg = genomicRegion(chrom, start+offSet, start+offSet+fragSize)
                 reg.addSmoothContCov(contBW, winLen, winType)
                 reg.addSmoothTestCov(testBW, winLen, winType)
-                sigRegs = reg.compare(5, 50, .00001, 1, minWinSize)
+                sigRegs = reg.compare(COMPsubWins, COMPbaseSteps, COMPpCutoff, COMPdiffCutoff, minWinSize)
                 for sigReg in sigRegs:
                     print sigReg
+
+
+
