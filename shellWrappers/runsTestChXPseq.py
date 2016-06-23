@@ -250,9 +250,12 @@ if __name__ == "__main__":
             if (start % 1e7) == 0:
                 print >> sys.stderr, chrom, start
             for offSet in xrange(0, minWinSize, int(minWinSize/5)):
+                print >> sys.stderr, "extracting region"
                 reg = genomicRegion(chrom, start+offSet, start+offSet+fragSize)
+                print >> sys.stderr, "smoothening coverage"
                 reg.addSmoothContCov(contBW, winLen, winType)
                 reg.addSmoothTestCov(testBW, winLen, winType)
+                print >> sys.stderr, "searching segments"
                 sigRegs = reg.compare(COMPsubWins, COMPbaseSteps, COMPpCutoff, COMPdiffCutoff, minWinSize)
                 for sigReg in sigRegs:
                     print sigReg
