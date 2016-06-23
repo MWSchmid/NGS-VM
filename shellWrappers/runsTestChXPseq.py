@@ -195,6 +195,8 @@ class bigWigConnection(object):
     def smoothCoverageFlat(self, covArray, winLen=147):
         """Calculate smoothened coverage using moving average.
         Note that winLen should be an odd integer."""
+        if (winLen % 2) == 0:
+            winLen += 1
         x = covArray
         s = np.r_[2 * x[0] - x[winLen:1:-1], x, 2 * x[-1] - x[-1:-winLen:-1]]
         w = np.ones(winLen, 'd')
@@ -204,6 +206,8 @@ class bigWigConnection(object):
     def smoothCoverageSpec(self, covArray, winLen=147, winType="blackman"):
         """Calculate smoothened coverage with a specified window type.
         Note that winLen should be an odd integer."""
+        if (winLen % 2) == 0:
+            winLen += 1
         x = covArray
         s = np.r_[2 * x[0] - x[winLen:1:-1], x, 2 * x[-1] - x[-1:-winLen:-1]]
         w = eval("np." + window + "(winLen)")
