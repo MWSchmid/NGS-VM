@@ -243,6 +243,9 @@ if __name__ == "__main__":
         testSize = testCS[chrom]
         size = max([contSize, testSize])    # in case of Raffaella and Giody I used only contSize
         print >> sys.stderr, chrom, size
+        if size < winLen:
+            print >> sys.stderr, "skipping it because of the size"
+            continue
         for start in xrange(0, size, fragSize):
             if (start % 1e7) == 0:
                 print >> sys.stderr, chrom, start
