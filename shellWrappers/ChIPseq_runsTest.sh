@@ -80,12 +80,13 @@ The comparison goes in both directions. For each region, there is an averageDiff
 which equals to mean(coverageInTes)-mean(coverageInControl). All significant differences
 are reported - irrespective of the sign of the comparison.
 Output:
-<OUTPREFIX>.RT.<winLen>.txt: chrom, start, end, pValue, averageDifference
-<OUTPREFIX>.RT.<winLen>.bed: chrom, start, end, enrichedIn<FileNameWithoutDotBW>, averageDifference 
+.RT.${winLen}_${winType}_${fragSize}_${minFragSize}_${subWins}_${baseSteps}_${pCut}_${diffCut}
+<OUTPREFIX>.RT.<winLen>_<winType>_<fragSize>_<minFragSize>_<subWins>_<baseSteps>_<pCut>_<diffCut>.txt: chrom, start, end, pValue, averageDifference
+<OUTPREFIX>.RT.<winLen>_<winType>_<fragSize>_<minFragSize>_<subWins>_<baseSteps>_<pCut>_<diffCut>.bed: chrom, start, end, enrichedIn<FileNameWithoutDotBW>, averageDifference 
 Arguments:
 INDIR: Directory with the input file (<extension/type>).
 OUTDIR: Directory in which all output will be store.
-OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.RT.<winLen>.bed/txt
+OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.RT.<winLen>_<winType>_<fragSize>_<minFragSize>_<subWins>_<baseSteps>_<pCut>_<diffCut>.bed/txt
 BIGWIGFILE_TEST: Name of the normalized bigWig file of the test sample.
 BIGWIGFILE_CONTROL: Name of the normalized bigWig file of the control sample.
 Options:
