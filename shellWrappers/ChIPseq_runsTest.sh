@@ -20,6 +20,7 @@
 #
 
 me=$(basename "$0")
+curDir=$(dirname "$0")
 
 ## defaults
 inputDir=""
@@ -27,8 +28,8 @@ outputDir=""
 prefix=""
 inputFile=""
 inputFileReference=""
-runsTestScript="$HOME/runsTestChXPseq.py"
-postProcScript="$HOME/processChXPrunsTest.R"
+runsTestScript="$curDir/runsTestChXPseq.py"
+postProcScript="$curDir/processChXPrunsTest.R"
 winLen=1000
 winType="flat"
 fragSize=1000000
@@ -92,14 +93,14 @@ BIGWIGFILE_CONTROL: Name of the normalized bigWig file of the control sample.
 Options:
   -v        enable verbose logging (no effect)
   -h        print this help text
-  -t		number of available threads (no effect)
+  -t        number of available threads (no effect)
   -m        amount of memory to be allocated (per core, in GB)
-  -s		path to the runsTestChXPseq.py script
-  -p		path to the processChXPrunsTest.R script
+  -s        path to the runsTestChXPseq.py script
+  -p        path to the processChXPrunsTest.R script
   -l        size of the smoothing window (default: 1'000 bp)
-  -w		type of the smoothing window (default: flat, i.e. moving average)
-  -f		initial fragment size (default: 1'000'000 bp)
-  -d		minimal fragment size (default: 1'000 bp)
+  -w        type of the smoothing window (default: flat, i.e. moving average)
+  -f        initial fragment size (default: 1'000'000 bp)
+  -d        minimal fragment size (default: 1'000 bp)
   -u        number of segments a windows is split into (default: 5)
   -b        take only every Xth base (default: 25)
   -q        cutoff for the P-value (default: 0.00001)
