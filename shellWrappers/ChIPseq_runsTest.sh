@@ -81,7 +81,6 @@ The comparison goes in both directions. For each region, there is an averageDiff
 which equals to mean(coverageInTes)-mean(coverageInControl). All significant differences
 are reported - irrespective of the sign of the comparison.
 Output:
-.RT.${winLen}_${winType}_${fragSize}_${minFragSize}_${subWins}_${baseSteps}_${pCut}_${diffCut}
 <OUTPREFIX>.RT.<winLen>_<winType>_<fragSize>_<minFragSize>_<subWins>_<baseSteps>_<pCut>_<diffCut>.txt: chrom, start, end, pValue, averageDifference
 <OUTPREFIX>.RT.<winLen>_<winType>_<fragSize>_<minFragSize>_<subWins>_<baseSteps>_<pCut>_<diffCut>.bed: chrom, start, end, enrichedIn<FileNameWithoutDotBW>, averageDifference 
 Arguments:
