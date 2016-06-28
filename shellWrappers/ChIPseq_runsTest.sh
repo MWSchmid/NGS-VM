@@ -38,6 +38,7 @@ subWins=5
 baseSteps=25
 pCut=0.00001
 diffCut=1
+largeMode=0
 threads=1
 memory=4
 maxMem=4
@@ -101,9 +102,10 @@ Options:
   -f        initial fragment size (default: 1'000'000 bp)
   -d        minimal fragment size (default: 1'000 bp)
   -u        number of segments a windows is split into (default: 5)
-  -b        take only every Xth base (default: 25)
+  -b        take only every Xth base AFTER smoothing (default: 25)
   -q        cutoff for the P-value (default: 0.00001)
   -c        cutoff for the LFC (default: 1)
+  -g        take only every Xth base BEFORE smoothing (default: 0 means take all bases - it's logically the same as 1 but faster)
 
 Dependencies:
 sudo easy_install ngslib
@@ -158,8 +160,8 @@ remove_if_present () {
 
 ## parse command-line
 
-short_opts='hvt:m:s:p:l:w:f:d:u:b:q:c:'
-long_opts='help,verbose,threads,memory,script,postProcScript,winLen,winType,fragSize,minFragSize,subWins,baseSteps,pCut,diffCut'
+short_opts='hvt:m:s:p:l:w:f:d:u:b:q:c:g:'
+long_opts='help,verbose,threads,memory,script,postProcScript,winLen,winType,fragSize,minFragSize,subWins,baseSteps,pCut,diffCut,largeMode'
 
 getopt -T > /dev/null
 rc=$?
@@ -192,9 +194,10 @@ while [ $# -gt 0 ]; do
         --baseSteps|-b)shift; baseSteps=$1 ;;
         --pCut|-q)     shift; pCut=$1 ;;
         --diffCut|-c)  shift; diffCut=$1 ;;
+        --largeMode|-g) shift; largeMode=$1 ;;
         --threads|-t)  shift; threads=$1 ;;
         --memory|-m)   shift; memory=$1 ;;	
-        --verbose|-v)  verbose='--verbose' ;;
+        --verbose|-v)  verbose="--verbose" ;;
         --help|-h)     usage; exit 0 ;;
         --)            shift; break ;;
     esac
@@ -230,8 +233,8 @@ input_exists ${inputDir}/${inputFileReference}
 input_exists ${postProcScript}
 
 # run script
-outfileName="${prefix}.RT.${winLen}_${winType}_${fragSize}_${minFragSize}_${subWins}_${baseSteps}_${pCut}_${diffCut}"
-command="${runsTestScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReference} ${winLen} ${winType} ${fragSize} ${minFragSize} --subWins ${subWins} --baseSteps ${baseSteps} --pCut ${pCut} --diffCut ${diffCut} > ${outputDir}/${outfileName}.txt"
+outfileName="${prefix}.RT.${winLen}_${winType}_${fragSize}_${minFragSize}_${subWins}_${baseSteps}_${pCut}_${diffCut}_${largeMode}"
+command="${runsTestScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReference} ${winLen} ${winType} ${fragSize} ${minFragSize} --subWins ${subWins} --baseSteps ${baseSteps} --pCut ${pCut} --diffCut ${diffCut} --largeMode ${largeMode} > ${outputDir}/${outfileName}.txt"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?

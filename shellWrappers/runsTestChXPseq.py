@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 usage:
-python runsTestChXPseq.py bwTest bwControl winLen winType fragSize minWinSize [--subWins 5] [--baseSteps 25] [--pCut 0.00001] [--diffCut 1]
+python runsTestChXPseq.py bwTest bwControl winLen winType fragSize minWinSize [--subWins 5] [--baseSteps 25] [--pCut 0.00001] [--diffCut 1] [--largeMode 0]
 
 install dependencies:
 sudo easy_install ngslib
@@ -23,9 +23,11 @@ arguments:
 
 optional arguments:
 --subWins (5): number of segments a windows is split into
---baseSteps (25): take only every Xth base
+--baseSteps (25): take only every Xth base AFTER smoothing
 --pCut (0.00001): cutoff for the P-value
 --diffCut (1): cutoff for the LFC
+--largeMode (0): take only every Xth base BEFORE smoothing
+                 zero means to take all bases (logically it's the same as 1 but faster)
 
 notes:
 \t-the bigWigs need to be normalized:
@@ -51,6 +53,7 @@ COMPsubWins = int(sys.argv[sys.argv.index("--subWins")+1]) if "--subWins" in sys
 COMPbaseSteps = int(sys.argv[sys.argv.index("--baseSteps")+1]) if "--baseSteps" in sys.argv else int(25)
 COMPpCutoff = float(sys.argv[sys.argv.index("--pCut")+1]) if "--pCut" in sys.argv else float(.00001)
 COMPdiffCutoff = float(sys.argv[sys.argv.index("--diffCut")+1]) if "--diffCut" in sys.argv else int(1)
+COMPlargeMode = int(sys.argv[sys.argv.index("--largeMode")+1]) if "--largeMode" in sys.argv else int(25)
 
 import wWigIO
 from ngslib import BigWigFile
@@ -117,6 +120,18 @@ class genomicRegion(object):
         """Add the test coverage given a bigWigConnection."""
         self.testCov = bwConnection.getSmoothCoverage(self.chrom, self.start, self.end,
                                                       winLen, winType)
+        return None
+
+    def addSmoothContCovLargeMode(self, bwConnection, winLen=147, winType="flat", largeMode=10):
+        """Add the control coverage given a bigWigConnection."""
+        self.contCov = bwConnection.getSmoothCoverageLargeMode(self.chrom, self.start, self.end,
+                                                      winLen, winType, largeMode)
+        return None
+
+    def addSmoothTestCovLargeMode(self, bwConnection, winLen=147, winType="flat", largeMode=10):
+        """Add the test coverage given a bigWigConnection."""
+        self.testCov = bwConnection.getSmoothCoverageLargeMode(self.chrom, self.start, self.end,
+                                                      winLen, winType, largeMode)
         return None
 
     def compare(self, subWins=5, baseSteps=25, pCutoff=.00001, diffCutoff=1, minSize=1e3):
@@ -234,7 +249,28 @@ class bigWigConnection(object):
             out = self.smoothCoverageSpec(raw, winLen, winType)
         return out
 
-if __name__ == "__main__":
+    def getRawCoverageLargeMode(self, chrom, start, end, largeMode=10):
+        """Retrieve an array with the genome coverage."""
+        out = np.zeros(end-start)
+        infile = BigWigFile(self.path)
+        wigs = infile.fetch(chrom, start, end)
+        for wig in wigs:
+            out[wig[0]-start:wig[1]-start] = wig[2]
+        infile.close()
+        return out[::largeMode]
+
+    def getSmoothCoverageLargeMode(self, chrom, start, end, winLen=147, winType="flat", largeMode=10):
+        """Retrieve an array with the smoothened genome coverage.
+        CHECK/TODO: one might have to extend the coverage array first"""
+        winLen = int(winLen/largeMode)
+        raw = self.getRawCoverageLargeMode(chrom, start, end, largeMode)
+        if winType == "flat":
+            out = self.smoothCoverageFlat(raw, winLen)
+        else:
+            out = self.smoothCoverageSpec(raw, winLen, winType)
+        return out
+
+if (__name__ == "__main__") and not COMPlargeMode:
     contBW = bigWigConnection(bwControl)
     testBW = bigWigConnection(bwTest)
     contCS = contBW.getChromSizesNGSLIB()
@@ -264,5 +300,35 @@ if __name__ == "__main__":
                 for sigReg in sigRegs:
                     print sigReg
 
-
+if (__name__ == "__main__") and COMPlargeMode:
+    contBW = bigWigConnection(bwControl)
+    testBW = bigWigConnection(bwTest)
+    contCS = contBW.getChromSizesNGSLIB()
+    testCS = testBW.getChromSizesNGSLIB()
+    minWinSize = int(minWinSize/COMPlargeMode)
+    if len(contCS) != len(testCS):
+        print >> sys.stderr, "WARNING: The two files have different numbers of chromosomes."
+    chromsToCheck = intersect(contCS.keys(), testCS.keys())
+    for chrom in chromsToCheck:
+        contSize = contCS[chrom]
+        testSize = testCS[chrom]
+        size = max([contSize, testSize])    # in case of Raffaella and Giody I used only contSize
+        print >> sys.stderr, chrom, size
+        if size < winLen:
+            print >> sys.stderr, "skipping it because of the size"
+            continue
+        for start in xrange(0, size, fragSize):
+            if (start % 1e7) == 0:
+                print >> sys.stderr, chrom, start
+            for offSet in xrange(0, minWinSize, int(minWinSize/5)):
+                print >> sys.stderr, "extracting region"
+                reg = genomicRegion(chrom, start+offSet, start+offSet+fragSize)
+                print >> sys.stderr, "smoothening coverage"
+                reg.addSmoothContCovLargeMode(contBW, winLen, winType, COMPlargeMode)
+                reg.addSmoothTestCovLargeMode(testBW, winLen, winType, COMPlargeMode)
+                print >> sys.stderr, "searching segments"
+                sigRegs = reg.compare(COMPsubWins, COMPbaseSteps, COMPpCutoff, COMPdiffCutoff, minWinSize)
+                for sigReg in sigRegs:
+                    print sigReg
+    
 
