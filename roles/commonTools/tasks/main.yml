@@ -101,6 +101,8 @@
   command: make apps chdir=/home/{{setupFolder}}/multovl/build
 - name: multovl - make install
   command: make install chdir=/home/{{setupFolder}}/multovl/build
+- name: multovl - copy all executables
+  command: find ./ -maxdepth 1 -type f -perm /a+x -exec cp {} /usr/local/bin \; chdir=/usr/local/bin/multovl-1.2/bin
 
 - name: cutadapt - install with pip
   pip: name=cutadapt
