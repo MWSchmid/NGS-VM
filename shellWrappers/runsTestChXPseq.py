@@ -305,7 +305,6 @@ if (__name__ == "__main__") and COMPlargeMode:
     testBW = bigWigConnection(bwTest)
     contCS = contBW.getChromSizesNGSLIB()
     testCS = testBW.getChromSizesNGSLIB()
-    minWinSize = int(minWinSize/COMPlargeMode)
     if len(contCS) != len(testCS):
         print >> sys.stderr, "WARNING: The two files have different numbers of chromosomes."
     chromsToCheck = intersect(contCS.keys(), testCS.keys())
