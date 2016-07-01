@@ -215,7 +215,7 @@ bedtools bamtobed -i ${inputDir}/${inputFile} > ${outputDir}/${inputFile//.bam}.
 bedtools bamtobed -i ${inputDir}/${inputFileReference} > ${outputDir}/${inputFileReference//.bam}.bed
 
 # run sicer
-command="SICER.sh ${inputDir} ${outputDir}/${inputFile//.bam}.bed ${outputDir}/${inputFileReference//.bam}.bed ${outputDir} ${genomeID} ${redundancyThreshold} ${winSize} ${fragSize} ${effectiveGenomeFraction} ${gapSize} ${evalue}"
+command="SICER.sh ${outputDir} ${inputFile//.bam}.bed ${inputFileReference//.bam}.bed ${outputDir} ${genomeID} ${redundancyThreshold} ${winSize} ${fragSize} ${effectiveGenomeFraction} ${gapSize} ${evalue}"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
