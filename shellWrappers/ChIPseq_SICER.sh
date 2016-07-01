@@ -227,7 +227,7 @@ awk -v OFS="\t" -v PREFIX=${prefix} '{if ($8 < 0.01) {print $1,$2,$3,PREFIX"_pea
 output_exists "${outputDir}/${prefix}.SICER.${winSize}.${gapSize}.bed"
 
 ## remove unused output
-rm "${outputDir}/${inputFile//.bed}-*"
+rm "${outputDir}/${inputFile//.bam}-*"
 remove_if_present ${outputDir}/${inputFile//.bam}.bed
 remove_if_present ${outputDir}/${inputFileReference//.bam}.bed
 
