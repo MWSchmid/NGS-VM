@@ -221,7 +221,7 @@ eval $command
 rc=$?
 echo "=== ${me}: Command ended with exit code $rc"
 
-awk -v OFS="\t" -v PREFIX=${prefix} '{if ($8 < 0.01) {print $1,$2,$3,PREFIX"_peak_"NR,$6,"."}}' "${outputDir}/${inputFile//.bed}-W${winSize}-G${$gapSize}-islands-summary-FDR100" | sort -k1,1 -k2,2n > ${outputDir}/${prefix}.SICER.${winSize}.${gapSize}.bed
+awk -v OFS="\t" -v PREFIX=${prefix} '{if ($8 < 0.01) {print $1,$2,$3,PREFIX"_peak_"NR,$6,"."}}' "${outputDir}/${inputFile//.bam}-W${winSize}-G${$gapSize}-islands-summary-FDR100" | sort -k1,1 -k2,2n > ${outputDir}/${prefix}.SICER.${winSize}.${gapSize}.bed
 
 ## Checking output
 output_exists "${outputDir}/${prefix}.SICER.${winSize}.${gapSize}.bed"
