@@ -180,8 +180,9 @@ INDIR=""
 OUTDIR=""
 PREFIX=""
 BAMFILE=""
-BAMFILECONTROL="" # optional
-./ChIPseq_sicer.sh -t 14 [-c $BAMFILECONTROL] $INDIR $OUTDIR $PREFIX $BAMFILE
+BAMFILECONTROL=""
+GENOMEID="must be in /usr/local/bin/SICER/lib/GenomeData.py"
+./ChIPseq_SICER.sh -t 14 $INDIR $OUTDIR $PREFIX $BAMFILE $BAMFILECONTROL
 ```
 
 ### Peak identification with home-made Runs-Test
