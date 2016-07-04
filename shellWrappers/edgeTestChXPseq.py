@@ -24,6 +24,9 @@ notes:
 \t-the regions should not be overlapping anymore
 \t-the bigWigs need to be normalized:
 \t\thttps://github.com/fidelram/deepTools/wiki/Normalizations
+
+idea taken from:
+http://www.nature.com/nature/journal/v453/n7197/full/nature06947.html#online-methods
 """
 
 import sys
