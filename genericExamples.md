@@ -188,16 +188,23 @@ GENOMEID="must be in /usr/local/bin/SICER/lib/GenomeData.py"
 ### Peak identification with home-made Runs-Test
 There is absolutely no warranty for this approach. It may only be used with very broad and diffuse signals. It essentially takes the difference between two normalized bigWigs and searches for significant streches with only negative or positive values. I included an example figure at the bottom.
 ```sh
-sudo cp ./runsTestChXPseq.py /usr/local/bin/
-sudo cp ./processChXPrunsTest.R /usr/local/bin/
-sudo chmod 755 /usr/local/bin/runsTestChXPseq.py
-sudo chmod 755 /usr/local/bin/processChXPrunsTest.R
 INDIR=""
 OUTDIR=""
 PREFIX=""
 BIGWIGTESTFILE="" # needs to be normalized
 BIGWIGCONTROLFILE="" # needs to be normalized
-./ChIPseq_runsTest.sh -t 14 [-c $BAMFILECONTROL] $INDIR $OUTDIR $PREFIX $BAMFILE
+./ChIPseq_runsTest.sh <many options> $INDIR $OUTDIR $PREFIX $BAMFILE $BAMFILECONTROL
+```
+
+### Peak identification with "edge test"
+Also here, absolutely no warranty. The approach is taken from [Guelen et al. 2008](http://www.nature.com/nature/journal/v453/n7197/full/nature06947.html#online-methods).
+```sh
+INDIR=""
+OUTDIR=""
+PREFIX=""
+BIGWIGTESTFILE="" # needs to be normalized
+BIGWIGCONTROLFILE="" # needs to be normalized
+./ChIPseq_edgeTest.sh <few options> $INDIR $OUTDIR $PREFIX $BAMFILE $BAMFILECONTROL
 ```
 
 ### Count reads per region - THIS IS NOT FOR RNA-SEQ!
