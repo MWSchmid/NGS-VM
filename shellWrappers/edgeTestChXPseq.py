@@ -159,7 +159,7 @@ class chromosome(object):
 
     def getBorders(self, floatDiff, threshold, randomized=False):
         """Identify edges in a vector of differences."""
-        out = {"MP":[], "BT":[], "SC":[]}
+        out = {"MP":[], "BT":[], "SC":[], "SKIP":False}
         diff = sign01vec(floatDiff)
         #diff = negZeroPosVec(floatDiff)
         if randomized:
@@ -176,6 +176,8 @@ class chromosome(object):
         numLB = sum([x=="LB" for x in out["BT"]])
         numRB = sum([x=="RB" for x in out["BT"]])
         print >> sys.stderr, "Identified %d left and %d right borders." % (numLB, numRB)
+        if (numLB == 0) or (numRB == 0):
+            out["SKIP"] = True
         return out
 
     def getBorderThreshold(self, floatDiff, numRep=10):
@@ -200,6 +202,8 @@ class chromosome(object):
         realDiff = self.testCov - self.contCov
         threshold = self.getBorderThreshold(realDiff, numRep)
         borders = self.getBorders(realDiff, threshold, randomized)
+        if borders["SKIP"]:
+            return []
         diff = sign01vec(realDiff)
         #diff = negZeroPosVec(realDiff)
         out = []
@@ -338,7 +342,7 @@ if (__name__ == "__main__"):
         contSize = contCS[chrom]
         testSize = testCS[chrom]
         size = max([contSize, testSize])
-        if size < 2*GLOBAL_LEFT_RIGHT*baseSteps:
+        if size < 10*GLOBAL_LEFT_RIGHT*baseSteps:
             print >> sys.stderr, "skipping chromosome %s due to its size" % chrom
             continue
         print >> sys.stderr, "processing chromosome %s of length %d" % (chrom, size)
