@@ -335,8 +335,6 @@ if (__name__ == "__main__"):
         print >> sys.stderr, "WARNING: The two files have different numbers of chromosomes."
     chromsToCheck = intersect(contCS.keys(), testCS.keys())
     for chrom in chromsToCheck:
-        if chrom == "chrMT":
-            break
         contSize = contCS[chrom]
         testSize = testCS[chrom]
         size = max([contSize, testSize])
