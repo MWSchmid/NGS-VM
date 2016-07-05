@@ -30,6 +30,7 @@ inputFile=""
 inputFileReference=""
 runsTestScript="$curDir/edgeTestChXPseq.py"
 postProcScript="$curDir/processChXPedgeTest.R"
+flankSize=100000
 baseSteps=100
 fPositive=0.7
 numReps=5
@@ -75,12 +76,12 @@ Usage:
 Compare two normalized (!) bigWigs with a custom-made edge-test. IMPORTANT:
 It's a one-sided test.
 Output:
-<OUTPREFIX>.ET.<baseSteps>_<fPositive>_<numReps>.txt: chrom, start, end, leftBorder, rightBorder, positiveFraction
-<OUTPREFIX>.ET.<baseSteps>_<fPositive>_<numReps>.bed: chrom, start, end, peak_<number>, positiveFraction*abs(LB)*abs(RB)/max(...)*100
+<OUTPREFIX>.ET.<flankSize>_<baseSteps>_<fPositive>_<numReps>.txt: chrom, start, end, leftBorder, rightBorder, positiveFraction
+<OUTPREFIX>.ET.<flankSize>_<baseSteps>_<fPositive>_<numReps>.bed: chrom, start, end, peak_<number>, positiveFraction*abs(LB)*abs(RB)/max(...)*100
 Arguments:
 INDIR: Directory with the input file (<extension/type>).
 OUTDIR: Directory in which all output will be store.
-OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.ET.<baseSteps>_<fPositive>_<numReps>.bed/txt
+OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.ET.<flankSize>_<baseSteps>_<fPositive>_<numReps>.bed/txt
 BIGWIGFILE_TEST: Name of the normalized bigWig file of the test sample.
 BIGWIGFILE_CONTROL: Name of the normalized bigWig file of the control sample.
 Options:
@@ -93,6 +94,7 @@ Options:
   -b        take only every Xth base (default: 100)
   -f        minimal fraction of positive differences within a candidate region (default: 0.7)
   -n        number of random sets (default: 5)
+  -l        size of the regions left and right of the border to check (default 100'000)
   -r        do the same as always, but randomize the test set as well (default: off) - NOT VISIBLE IN THE FILE NAME PER SE
 
 Dependencies:
@@ -148,8 +150,8 @@ remove_if_present () {
 
 ## parse command-line
 
-short_opts='hvt:m:s:p:b:f:n:r'
-long_opts='help,verbose,threads,memory,script,postProcScript,baseSteps,fPositive,numReps,randomized'
+short_opts='hvt:m:s:p:b:f:n:l:r'
+long_opts='help,verbose,threads,memory,script,postProcScript,baseSteps,fPositive,numReps,flankSize,randomized'
 
 getopt -T > /dev/null
 rc=$?
@@ -177,6 +179,7 @@ while [ $# -gt 0 ]; do
         --baseSteps|-b)shift; baseSteps=$1 ;;
         --fPositive|-f)shift; fPositive=$1 ;;
         --numReps|-n)  shift; numReps=$1 ;;
+        --flankSize|-l)shift; flankSize=$1 ;;
         --randomized|-r) randomized=" --randomized" ;;
         --threads|-t)  shift; threads=$1 ;;
         --memory|-m)   shift; memory=$1 ;;	
@@ -216,8 +219,8 @@ input_exists ${inputDir}/${inputFileReference}
 input_exists ${postProcScript}
 
 # run script
-outfileName="${prefix}.ET.${baseSteps}_${fPositive}_${numReps}"
-command="${runsTestScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReference} --baseSteps ${baseSteps} --fPositive ${fPositive} --numReps ${numReps}${randomized} > ${outputDir}/${outfileName}.txt"
+outfileName="${prefix}.ET.${flankSize}_${baseSteps}_${fPositive}_${numReps}"
+command="${runsTestScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReference} --baseSteps ${baseSteps} --fPositive ${fPositive} --numReps ${numReps} --flankSize ${flankSize}${randomized} > ${outputDir}/${outfileName}.txt"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?

@@ -18,6 +18,7 @@ optional arguments:
 \t--baseSteps: take only every Xth base (default: 100)
 \t--fPositive: minimal fraction of positive differences within a candidate region (default: 0.7)
 \t--numReps: number of random sets (default: 5)
+\t--flankSize: size of the regions left and right of the border to check (default 100'000)
 \t--randomized: do the same as always, but randomize the test set as well (default: off)
 
 notes:
@@ -41,9 +42,10 @@ except:
 fPositive = float(sys.argv[sys.argv.index("--fPositive")+1]) if "--fPositive" in sys.argv else float(0.7)
 numReps = int(sys.argv[sys.argv.index("--numReps")+1]) if "--numReps" in sys.argv else 5
 baseSteps = int(sys.argv[sys.argv.index("--baseSteps")+1]) if "--baseSteps" in sys.argv else 100
+flankSize = int(sys.argv[sys.argv.index("--flankSize")+1]) if "--flankSize" in sys.argv else 1e5
 randomized = "--randomized" in sys.argv
 
-GLOBAL_LEFT_RIGHT=int(1e5/baseSteps)
+GLOBAL_LEFT_RIGHT=int(flankSize/baseSteps)
 
 import wWigIO
 from ngslib import BigWigFile
@@ -208,7 +210,6 @@ class chromosome(object):
         #diff = negZeroPosVec(realDiff)
         out = []
         prevBorderIdx = borders["BT"].index("LB")
-        isOpen = True
         for i in xrange(prevBorderIdx+1, len(borders["MP"]), 1):
             posFrac = diff[prevBorderIdx:i].mean()
             prevBorderType = borders["BT"][prevBorderIdx]
