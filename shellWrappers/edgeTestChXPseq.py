@@ -206,15 +206,11 @@ class chromosome(object):
         borders = self.getBorders(realDiff, threshold, randomized)
         if borders["SKIP"]:
             return []
-        diff = sign01vec(realDiff)
-        diff = np.array(diff)
-        
         #diff = negZeroPosVec(realDiff)
         out = []
         prevBorderIdx = borders["BT"].index("LB")
         for i in xrange(prevBorderIdx+1, len(borders["MP"]), 1):
-            temp = diff[prevBorderIdx:i]
-            temp = temp[temp!=0]
+            temp = sign01vec([x for x in realDiff[prevBorderIdx:i] if x!=0])
             posFrac = temp.mean() if temp.size>0 else 0
             prevBorderType = borders["BT"][prevBorderIdx]
             curBorderType = borders["BT"][i]
