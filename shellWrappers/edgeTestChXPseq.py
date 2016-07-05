@@ -162,8 +162,8 @@ class chromosome(object):
     def getBorders(self, floatDiff, threshold, randomized=False):
         """Identify edges in a vector of differences."""
         out = {"MP":[], "BT":[], "SC":[], "SKIP":False}
-        diff = sign01vec(floatDiff)
-        #diff = negZeroPosVec(floatDiff)
+        #diff = sign01vec(floatDiff)
+        diff = negZeroPosVec(floatDiff)
         if randomized:
             np.random.shuffle(diff)
         for midPoint in xrange(GLOBAL_LEFT_RIGHT, diff.size-GLOBAL_LEFT_RIGHT, 1):
@@ -184,8 +184,8 @@ class chromosome(object):
 
     def getBorderThreshold(self, floatDiff, numRep=10):
         """Shuffle everything <numRep> times and get the distribution for the border values."""
-        diff = sign01vec(floatDiff)
-        #diff = negZeroPosVec(floatDiff)
+        #diff = sign01vec(floatDiff)
+        diff = negZeroPosVec(floatDiff)
         temp = numRep*[0]
         for i in xrange(0, numRep, 1):
             np.random.shuffle(diff)
@@ -207,11 +207,15 @@ class chromosome(object):
         if borders["SKIP"]:
             return []
         diff = sign01vec(realDiff)
+        diff = np.array(diff)
+        
         #diff = negZeroPosVec(realDiff)
         out = []
         prevBorderIdx = borders["BT"].index("LB")
         for i in xrange(prevBorderIdx+1, len(borders["MP"]), 1):
-            posFrac = diff[prevBorderIdx:i].mean()
+            temp = diff[prevBorderIdx:i]
+            temp = temp[temp!=0]
+            posFrac = temp.mean() if temp.size>0 else 0
             prevBorderType = borders["BT"][prevBorderIdx]
             curBorderType = borders["BT"][i]
             if prevBorderType == curBorderType:
