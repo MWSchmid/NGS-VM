@@ -5,7 +5,7 @@ Note: I used this playbook to setup my NGS VMs on the ScienceCloud at the UZH. T
 
 Warning: I tested the VM-setup in June 2016 (I did the first version end of 2015). I had to update two packages (SPP and MULTOVL) and still need to check/test whether the updates have an effect on the functionality (phantompeakqualtools requires SPP). In general, some parts may become outdated in relatively short time... Another thing one could think of is to set the version number of the packages which are directly downloaded with pip.
 
-While testing it again, building picard failed. Will be fixed in the next days.
+Feel free to contact me if you encounter problems :)
 
 ## Requirements
 
