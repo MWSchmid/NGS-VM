@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-# ChIPseq_macs.sh -- runs MACS2 to identify narrow and broad peaks.
-# with or without reference sample.
+# preprocessIlluminaFastq_PE.sh -- script for preprocessing of Illumina reads (PE)
 #
 # Authors: Marc W. Schmid <marcschmid@gmx.ch>
 #
@@ -27,8 +26,7 @@ inputDir=""
 outputDir=""
 prefix=""
 inputFile=""
-inputFileReference="none_empty"
-genome=""
+inputFileReverse=""
 threads=1
 memory=4
 maxMem=4
@@ -66,23 +64,22 @@ function die () {
 usage () {
     cat <<__EOF__
 Usage:
-  $me [options] [INDIR] [OUTDIR] [OUTPREFIX] [BAMFILE] [GENOME]
-Runs MACS2 with/without input control to identify narrow/broad peaks. Note that the
-extsize for running without control is set to 170 (histone modifications).
-Creates three files (rest will be removed):
-- <OUTPREFIX>(.withControl).NP.bed (narrow peaks)
-- <OUTPREFIX>(.withControl).BP.bed (broad peaks)
-- <OUTPREFIX>(.withControl).GP.bed (gapped peaks)
+  $me [options] [INDIR] [OUTDIR] [OUTPREFIX] [FASTQ-forward] [FASTQ-reverse]
+This script will run:
+1) fastqc: standard quality checks
+2) trimGalore: Illumina adapter removal and low quality clipping
+3) fqtrim: low complexity filter
+
+NOTE: not yet tested
+
 Arguments:
-INDIR: Directory with the input file (<extension/type>).
+INDIR: Directory with the input files.
 OUTDIR: Directory in which all output will be store.
-OUTPREFIX: Prefix for output. The output files will be named <OUTPREFIX>.NP/BP/GP.bed
-BAMFILE: Name of the bam file of the test sample.
-GENOME: Effective genome size (can also be mm, hs, cm, de).
-REFERENCE_BAMFILE [OPTIONAL]: Name of the bam file of the control sample (input control).
+OUTPREFIX: Prefix for output. The output files will be named <OUTPREFIX>_R<1/2>.tr(.fi).fq.gz
+FASTQ-forward: Name of the fastq(.gz) file with the forward reads.
+FASTQ-reverse: Name of the fastq(.gz) file with the reverse reads.
 Options:
-  -c		REFERENCE_BAMFILE (see above)
-  -v            Enable verbose logging
+  -v            Enable verbose logging (no effect)
   -h            Print this help text
   -t		Number of available threads
   -m            Amount of memory to be allocated (per core, in GB)
@@ -128,16 +125,10 @@ output_exists () {
   fi
 }
 
-remove_if_present () {
-  if [ -e $1 ]; then
-    rm $1
-  fi
-}
-
 ## parse command-line
 
-short_opts='hvt:m:c:'
-long_opts='help,verbose,threads,memory,control'
+short_opts='hvt:m:'
+long_opts='help,verbose,threads,memory'
 
 getopt -T > /dev/null
 rc=$?
@@ -160,15 +151,16 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --control|-c)  shift; inputFileReference=$1 ;;
-	--threads|-t)  shift; threads=$1 ;;
-	--memory|-m)   shift; memory=$1 ;;	
-        --verbose|-v)  verbose='--verbose' ;;
-        --help|-h)     usage; exit 0 ;;
-        --)            shift; break ;;
+	--threads|-t)  		shift; threads=$1 ;;
+	--memory|-m)  		shift; memory=$1 ;;	
+        --verbose|-v) 		verbose='--verbose' ;;
+        --help|-h)    		usage; exit 0 ;;
+        --)           		shift; break ;;
     esac
     shift
 done
+
+maxMem=$(($threads * $memory))
 
 ## sanity checks
 
@@ -185,59 +177,60 @@ prefix=$1
 shift
 inputFile=$1
 shift
-genome=$1
+inputFileReverse=$1
 
 ## main
 echo "=== ${me}: Starting at `date '+%Y-%m-%d %H:%M:%S'`"
 
-require_command macs2 
+require_command trim_galore
+require_command fastqc
+require_command fqtrim
 
 # checking input
 input_exists ${inputDir}/${inputFile}
-if [[ $inputFileReference != none* ]]; then
-    input_exists ${inputDir}/${inputFileReference}
-fi
+input_exists ${inputDir}/${inputFileReverse}
 
-# run script
-if [[ $inputFileReference != none* ]]; then
-command="macs2 callpeak -f BAM -t ${inputDir}/${inputFile} -c ${inputDir}/${inputFileReference} -n ${prefix} --outdir ${outputDir} -g ${genome} -q 0.01"
+# run fastqc
+command="fastqc -t ${threads} -o ${outputDir} ${inputDir}/${inputFile} ${inputDir}/${inputFileReverse}"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
 echo "=== ${me}: Command ended with exit code $rc"
-command="macs2 callpeak -f BAM -t ${inputDir}/${inputFile} -c ${inputDir}/${inputFileReference} -n ${prefix} --outdir ${outputDir} -g ${genome} -q 0.05 --broad --broad-cutoff 0.1"
-echo "=== ${me}: Running: ${command}"
-eval $command
-rc=$?
-echo "=== ${me}: Command ended with exit code $rc"
-mv ${outputDir}/${prefix}_peaks.narrowPeak ${outputDir}/${prefix}.withControl.NP.bed
-mv ${outputDir}/${prefix}_peaks.broadPeak ${outputDir}/${prefix}.withControl.BP.bed
-mv ${outputDir}/${prefix}_peaks.gappedPeak ${outputDir}/${prefix}.withControl.GP.bed
-else
-command="macs2 callpeak -f BAM -t ${inputDir}/${inputFile} -n ${prefix} --outdir ${outputDir} -g ${genome} --nomodel --extsize 170 -q 0.01"
-echo "=== ${me}: Running: ${command}"
-eval $command
-rc=$?
-echo "=== ${me}: Command ended with exit code $rc"
-command="macs2 callpeak -f BAM -t ${inputDir}/${inputFile} -n ${prefix} --outdir ${outputDir} -g ${genome} --nomodel --extsize 170 -q 0.05 --broad --broad-cutoff 0.1"
-echo "=== ${me}: Running: ${command}"
-eval $command
-rc=$?
-echo "=== ${me}: Command ended with exit code $rc"
-mv ${outputDir}/${prefix}_peaks.narrowPeak ${outputDir}/${prefix}.NP.bed
-mv ${outputDir}/${prefix}_peaks.broadPeak ${outputDir}/${prefix}.BP.bed
-mv ${outputDir}/${prefix}_peaks.gappedPeak ${outputDir}/${prefix}.GP.bed
-fi
 
-# remove some files if they are there
-remove_if_present ${outputDir}/${prefix}_model.r
-remove_if_present ${outputDir}/${prefix}_peaks.xls
-remove_if_present ${outputDir}/${prefix}_summits.bed
+# run trim_galore
+command="trim_galore --illumina --paired -o ${outputDir} ${inputDir}/${inputFile} ${inputDir}/${inputFileReverse}"
+echo "=== ${me}: Running: ${command}"
+eval $command
+rc=$?
+echo "=== ${me}: Command ended with exit code $rc"
+remove_if_present "${outputDir}/${inputFile%%.*}_1_trimmed.fq.gz"
+remove_if_present "${outputDir}/${inputFileReverse%%.*}_2_trimmed.fq.gz"
+mv "${outputDir}/${inputFile%%.*}_val_1.fq.gz" "${outputDir}/${prefix}_R1_paired.tr.fq.gz"
+mv "${outputDir}/${inputFileReverse%%.*}_val_2.fq.gz" "${outputDir}/${prefix}_R2_paired.tr.fq.gz"
 
-## Checking output
-output_exists "${outputDir}/${prefix}.NP.bed"
-output_exists "${outputDir}/${prefix}.BP.bed"
-output_exists "${outputDir}/${prefix}.GP.bed"
+# run fqtrim for the paired files
+input_exists "${outputDir}/${prefix}_R1_paired.tr.fq.gz"
+input_exists "${outputDir}/${prefix}_R2_paired.tr.fq.gz"
+command="fqtrim -A -D -l 30 -r ${outputDir}/${prefix}_fqtrimReportPaired.txt -p ${threads} -o fi.fq.gz ${outputDir}/${prefix}_R1_paired.tr.fq.gz,${outputDir}/${prefix}_R2_paired.tr.fq.gz" 
+echo "=== ${me}: Running: ${command}"
+eval $command
+rc=$?
+echo "=== ${me}: Command ended with exit code $rc"
+
+# moving output files from fqtrim
+for fileExt in R1_paired R2_paired
+do curFile="${prefix}_${fileExt}.tr.fi.fq.gz"
+output_exists "${prefix}_${fileExt}.tr.fi.fq.gz"
+mv ${curFile} ${outputDir}/${curFile}
+output_exists ${outputDir}/${curFile}
+done
+
+# run fastqc again
+command="fastqc -t ${threads} -o ${outputDir} ${outputDir}/${prefix}_R1_paired.tr.fi.fq.gz ${outputDir}/${prefix}_R2_paired.tr.fi.fq.gz"
+echo "=== ${me}: Running: ${command}"
+eval $command
+rc=$?
+echo "=== ${me}: Command ended with exit code $rc"
 
 ## All done.
 echo "=== ${me}: Script done at `date '+%Y-%m-%d %H:%M:%S'`."
