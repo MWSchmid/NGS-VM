@@ -28,6 +28,7 @@ prefix=""
 inputFile=""
 index=""
 uniqueOnly="-B 10"
+predOffset="-P 3"
 threads=1
 memory=3 # samtools frequently underestimates RAM usage
 maxMem=4
@@ -76,6 +77,7 @@ OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.bam(.bai
 FASTQ: Name of the fastq(.gz) file.
 INDEX: Subjunc/subread index for the alignment (can also be color space).
 Options:
+  -p            use PHRED offset of 64 instead of 33
   -v            Enable verbose logging (no effect)
   -h            Print this help text
   -t		Number of available threads
@@ -124,8 +126,8 @@ output_exists () {
 
 ## parse command-line
 
-short_opts='hvt:m:u'
-long_opts='help,verbose,threads,memory,unique'
+short_opts='hvt:m:up'
+long_opts='help,verbose,threads,memory,unique,phredOffset'
 
 getopt -T > /dev/null
 rc=$?
@@ -148,6 +150,7 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
+        --phredOffset|-p) phredOffset="-P 6" ;;
     	--unique|-u)   uniqueOnly="-u" ;;
 	--threads|-t)  shift; threads=$1 ;;
 	--memory|-m)   shift; memory=$1 ;;	
@@ -187,8 +190,15 @@ require_command samtools
 input_exists ${inputDir}/${inputFile}
 input_exists "${index}.files"
 
+# check for *.gz
+if [[ ${inputFile} == *.gz ]]; then
+fileTypeOption="--gzFASTQinput "
+else
+fileTypeOption=""
+fi
+
 # run script
-command="subjunc -T ${threads} -i ${index} --allJunctions ${uniqueOnly} -n 20 -m 5
+command="subjunc -T ${threads} -i ${index} ${fileTypeOption}--allJunctions ${uniqueOnly} -n 20 -m 5 ${phredOffset}
 	 -r ${inputDir}/${inputFile} | samtools view -h -b -F0x4 - > ${outputDir}/${prefix}_us.bam"
 echo "=== ${me}: Running: ${command}"
 eval $command

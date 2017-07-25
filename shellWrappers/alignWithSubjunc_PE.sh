@@ -29,6 +29,7 @@ inputFile=""
 inputFileReverse=""
 index=""
 uniqueOnly="-B 10"
+predOffset="-P 3"
 threads=1
 memory=3 # samtools frequently underestimates RAM usage
 maxMem=4
@@ -78,6 +79,7 @@ FASTQ-forward: Name of the fastq(.gz) file with the forward reads.
 FASTQ-reverse: Name of the fastq(.gz) file with the reverse reads.
 INDEX: Subjunc/subread index for the alignment (can also be color space).
 Options:
+  -p            use PHRED offset of 64 instead of 33
   -u		Keep only reads with unique alignments.
   -v            Enable verbose logging (no effect)
   -h            Print this help text
@@ -127,8 +129,8 @@ output_exists () {
 
 ## parse command-line
 
-short_opts='hvt:m:u'
-long_opts='help,verbose,threads,memory,unique'
+short_opts='hvt:m:up'
+long_opts='help,verbose,threads,memory,unique,phredOffset'
 
 getopt -T > /dev/null
 rc=$?
@@ -151,6 +153,7 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
+        --phredOffset|-p) phredOffset="-P 6" ;;
     	--unique|-u)   uniqueOnly="-u" ;;
 	--threads|-t)  shift; threads=$1 ;;
 	--memory|-m)   shift; memory=$1 ;;	
@@ -193,8 +196,15 @@ input_exists ${inputDir}/${inputFile}
 input_exists ${inputDir}/${inputFileReverse}
 input_exists "${index}.files"
 
+# check for *.gz
+if [[ ${inputFile} == *.gz ]]; then
+fileTypeOption="--gzFASTQinput "
+else
+fileTypeOption=""
+fi
+
 # run script
-command="subjunc -T ${threads} -i ${index} --allJunctions ${uniqueOnly} -n 20 -m 5 -p 3
+command="subjunc -T ${threads} -i ${index} ${fileTypeOption}--allJunctions ${uniqueOnly} -n 20 -m 5 ${phredOffset}
 	 -r ${inputDir}/${inputFile} -R ${inputDir}/${inputFileReverse} | samtools view -h -b -F0x4 - > ${outputDir}/${prefix}_us.bam"
 echo "=== ${me}: Running: ${command}"
 eval $command
