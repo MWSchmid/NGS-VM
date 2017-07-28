@@ -222,8 +222,17 @@ eval $command
 rc=$?
 echo "=== ${me}: Command ended with exit code $rc"
 
+# run fqtrim for the unpaired files
+input_exists "${outputDir}/${prefix}_R1_unpaired.tr.fq.gz"
+input_exists "${outputDir}/${prefix}_R2_unpaired.tr.fq.gz"
+command="fqtrim -A -D -l 30 -r ${outputDir}/${prefix}_fqtrimReportUnpaired.txt -p ${threads} -o fi.fq.gz ${outputDir}/${prefix}_R1_unpaired.tr.fq.gz ${outputDir}/${prefix}_R2_unpaired.tr.fq.gz"
+echo "=== ${me}: Running: ${command}"
+eval $command
+rc=$?
+echo "=== ${me}: Command ended with exit code $rc"
+
 # moving output files from fqtrim
-for fileExt in R1_paired R2_paired
+for fileExt in R1_paired R2_paired R1_unpaired R2_unpaired
 do curFile="${prefix}_${fileExt}.tr.fi.fq.gz"
 output_exists "${prefix}_${fileExt}.tr.fi.fq.gz"
 mv ${curFile} ${outputDir}/${curFile}
