@@ -30,6 +30,7 @@ inputFileReverse=""
 solidOption=""
 pyScript="$HOME/mergeAndSortSplitPEreads.py"
 threads=1
+compThreadsMerge=1
 memory=4
 maxMem=4
 
@@ -173,6 +174,9 @@ while [ $# -gt 0 ]; do
 done
 
 maxMem=$(($threads * $memory))
+if [ $threads -gt 1 ]; then
+compThreadsMerge=s3="$(($threads - 1))"
+fi
 
 ## sanity checks
 
@@ -213,7 +217,7 @@ fi
 # merge the reads
 command="python ${pyScript} ${inputDir}/${inputFile} ${inputDir}/${inputFileReverse}\
 	 ${outputDir}/${prefix}_R1.repaired.fq.gz ${outputDir}/${prefix}_R2.repaired.fq.gz\
-	 ${outputDir}/${prefix}_TEMP.unpairable.fq.gz --maxReads 5000000${solidOption}"
+	 ${outputDir}/${prefix}_TEMP.unpairable.fq.gz --maxReads 3000000${solidOption}"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
