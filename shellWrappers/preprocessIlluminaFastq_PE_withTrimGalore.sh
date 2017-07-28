@@ -208,7 +208,7 @@ remove_if_present "${outputDir}/${inputFileReverse%%.*}_2_trimmed.fq.gz"
 mv "${outputDir}/${inputFile%%.*}_val_1.fq.gz" "${outputDir}/${prefix}_R1_paired.tr.fq.gz"
 mv "${outputDir}/${inputFileReverse%%.*}_val_2.fq.gz" "${outputDir}/${prefix}_R2_paired.tr.fq.gz"
 mv "${outputDir}/${inputFile%%.*}_unpaired_1.fq.gz" "${outputDir}/${prefix}_R1_unpaired.tr.fq.gz"
-mv "${outputDir}/${inputFileReverse%%.*}_unpaired_2.fq.gz" "${outputDir}/${prefix}_R1_unpaired.tr.fq.gz"
+mv "${outputDir}/${inputFileReverse%%.*}_unpaired_2.fq.gz" "${outputDir}/${prefix}_R2_unpaired.tr.fq.gz"
 
 # run fqtrim for the paired files
 input_exists "${outputDir}/${prefix}_R1_paired.tr.fq.gz"
