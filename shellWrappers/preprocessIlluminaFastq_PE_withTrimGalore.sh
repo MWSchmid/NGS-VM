@@ -185,7 +185,6 @@ echo "=== ${me}: Starting at `date '+%Y-%m-%d %H:%M:%S'`"
 require_command trim_galore
 require_command fastqc
 require_command fqtrim
-require_command pigz
 
 # checking input
 input_exists ${inputDir}/${inputFile}
@@ -208,10 +207,8 @@ remove_if_present "${outputDir}/${inputFile%%.*}_1_trimmed.fq.gz"
 remove_if_present "${outputDir}/${inputFileReverse%%.*}_2_trimmed.fq.gz"
 mv "${outputDir}/${inputFile%%.*}_val_1.fq.gz" "${outputDir}/${prefix}_R1_paired.tr.fq.gz"
 mv "${outputDir}/${inputFileReverse%%.*}_val_2.fq.gz" "${outputDir}/${prefix}_R2_paired.tr.fq.gz"
-mv "${outputDir}/${inputFile%%.*}.unpaired_1.fq" "${outputDir}/${prefix}_R1_unpaired.tr.fq"
-mv "${outputDir}/${inputFileReverse%%.*}.unpaired_2.fq" "${outputDir}/${prefix}_R1_unpaired.tr.fq"
-pigz -p ${threads} "${outputDir}/${prefix}_R1_unpaired.tr.fq"
-pigz -p ${threads} "${outputDir}/${prefix}_R2_unpaired.tr.fq"
+mv "${outputDir}/${inputFile%%.*}_unpaired_1.fq.gz" "${outputDir}/${prefix}_R1_unpaired.tr.fq.gz"
+mv "${outputDir}/${inputFileReverse%%.*}_unpaired_2.fq.gz" "${outputDir}/${prefix}_R1_unpaired.tr.fq.gz"
 
 # run fqtrim for the paired files
 input_exists "${outputDir}/${prefix}_R1_paired.tr.fq.gz"
