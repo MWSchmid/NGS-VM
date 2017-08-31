@@ -28,6 +28,7 @@ prefix=""
 inputFile=""
 inputFileReverse=""
 index=""
+uniqueOnly="-q 10 "
 threads=1
 memory=3 # samtools frequently underestimates RAM usage
 maxMem=4
@@ -66,7 +67,7 @@ usage () {
     cat <<__EOF__
 Usage:
   $me [options] [INDIR] [OUTDIR] [OUTPREFIX] [FASTQ-forward] [FASTQ-reverse] [INDEX]
-This script aligns Illumina reads (PE) with bowtie2. Only unique alignments are kept.
+This script aligns Illumina reads (PE) with bowtie2. 
 Output will be a sorted bam file and its index (bai).
 Arguments:
 INDIR: Directory with the input file.
@@ -76,6 +77,7 @@ FASTQ-forward: Name of the fastq(.gz) file with the forward reads.
 FASTQ-reverse: Name of the fastq(.gz) file with the reverse reads.
 INDEX: Bowtie2 index for the alignment.
 Options:
+  -n            use also non-unique alignments
   -v            Enable verbose logging (no effect)
   -h            Print this help text
   -t		Number of available threads
@@ -124,8 +126,8 @@ output_exists () {
 
 ## parse command-line
 
-short_opts='hvt:m:'
-long_opts='help,verbose,threads,memory'
+short_opts='hvt:m:n'
+long_opts='help,verbose,threads,memory,nonUnique'
 
 getopt -T > /dev/null
 rc=$?
@@ -148,6 +150,7 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
+    	--nonUnique|-n) uniqueOnly="" ;;
 	--threads|-t)  shift; threads=$1 ;;
 	--memory|-m)   shift; memory=$1 ;;	
         --verbose|-v)  verbose='--verbose' ;;
@@ -190,7 +193,7 @@ input_exists ${inputDir}/${inputFileReverse}
 input_exists "${index}.1.bt2*"
 
 # run script
-command="bowtie2 -p ${threads} --no-unal -x ${index} -1 ${inputDir}/${inputFile} -2 ${inputDir}/${inputFileReverse} | samtools view -q 10 -h -b -F0x4 - > ${outputDir}/${prefix}_us.bam"
+command="bowtie2 -p ${threads} --no-unal -x ${index} -1 ${inputDir}/${inputFile} -2 ${inputDir}/${inputFileReverse} | samtools view ${uniqueOnly}-h -b -F0x4 - > ${outputDir}/${prefix}_us.bam"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?

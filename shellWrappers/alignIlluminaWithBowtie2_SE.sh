@@ -27,6 +27,7 @@ outputDir=""
 prefix=""
 inputFile=""
 index=""
+uniqueOnly="-q 10 "
 threads=1
 memory=3 # samtools frequently underestimates RAM usage
 maxMem=4
@@ -74,6 +75,7 @@ OUTPREFIX: Prefix for output. The output file will be named <OUTPREFIX>.bam(.bai
 FASTQ: Name of the fastq(.gz) file.
 INDEX: Bowtie2 index for the alignment.
 Options:
+  -n            use also non-unique alignments
   -v            Enable verbose logging (no effect)
   -h            Print this help text
   -t		Number of available threads
@@ -122,8 +124,8 @@ output_exists () {
 
 ## parse command-line
 
-short_opts='hvt:m:'
-long_opts='help,verbose,threads,memory'
+short_opts='hvt:m:n'
+long_opts='help,verbose,threads,memory,nonUnique'
 
 getopt -T > /dev/null
 rc=$?
@@ -146,6 +148,7 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
+    	--nonUnique|-n) uniqueOnly="" ;;
 	--threads|-t)  shift; threads=$1 ;;
 	--memory|-m)   shift; memory=$1 ;;	
         --verbose|-v)  verbose='--verbose' ;;
@@ -185,7 +188,7 @@ input_exists ${inputDir}/${inputFile}
 input_exists "${index}.1.bt2*"
 
 # run script
-command="bowtie2 -p ${threads} --no-unal -x ${index} -U ${inputDir}/${inputFile} | samtools view -q 10 -h -b -F0x4 - > ${outputDir}/${prefix}_us.bam"
+command="bowtie2 -p ${threads} --no-unal -x ${index} -U ${inputDir}/${inputFile} | samtools view ${uniqueOnly}-h -b -F0x4 - > ${outputDir}/${prefix}_us.bam"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
