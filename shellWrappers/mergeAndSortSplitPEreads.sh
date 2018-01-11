@@ -175,7 +175,7 @@ done
 
 maxMem=$(($threads * $memory))
 if [ $threads -gt 1 ]; then
-compThreadsMerge=s3="$(($threads - 1))"
+compThreadsMerge="$(($threads - 1))"
 fi
 
 ## sanity checks
