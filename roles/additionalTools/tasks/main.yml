@@ -1,5 +1,5 @@
 ---
-# ADDITIONAL TOOLS
+# ADDITIONAL TOOLS
 - name: copy and unpack tools
   unarchive: src={{item}}.tar.gz dest=/home/{{setupFolder}} creates={{item}}
   with_items:
@@ -23,7 +23,7 @@
 - name: picard - move htsjdk
   command: mv htsjdk picard/ chdir=/home/{{uservar}} creates=picard/htsjdk
 - name: picard - build
-  command: ant chdir=/home/{{uservar}}/picard
+  command: ./gradlew shadowJar chdir=/home/{{uservar}}/picard
 - name: picard - change ownership
   file: path=/home/{{uservar}}/picard owner={{uservar}} group={{uservar}} state=directory recurse=yes
 

@@ -34,9 +34,6 @@
    - sqlite
    - libsqlite-dev
    - librsvg2-bin
-   - r-base
-   - r-base-dev
-   - r-cran-rsqlite
    - curl
    - libcurl4-openssl-dev
    - libxml2-dev
@@ -44,7 +41,7 @@
    - cython
    - python-setuptools
    - java-common
-   - openjdk-7-jdk
+   - openjdk-8-jdk
    - ant
    - qt-sdk
    - smbclient
@@ -52,6 +49,15 @@
    - screen
    - libfreetype6
    - libfreetype6-dev
+   - openssl
+   - libssl-dev
+   - libmariadb-client-lgpl-dev
+   - libcurl4-openssl-dev
+   - r-base
+   - r-base-dev
+   - r-cran-rsqlite
+   - r-cran-rjava
+   - r-cran-rmysql
 
 - name: create a setup folder owned by root
   file: path=/home/{{setupFolder}} state=directory

@@ -192,7 +192,8 @@ require_command bedGraphToBigWig
 input_exists ${inputDir}/${inputFile}
 
 # generate the normalized bigWig 
-command="bamCoverage -b ${inputDir}/${inputFile} -o ${outputDir}/${prefix}.norm.bw --normalizeTo1x ${mappableGenome} -p ${threads}"
+#command="bamCoverage -b ${inputDir}/${inputFile} -o ${outputDir}/${prefix}.norm.bw --normalizeTo1x ${mappableGenome} -p ${threads}"
+command="bamCoverage -b ${inputDir}/${inputFile} -o ${outputDir}/${prefix}.norm.bw --normalizeUsing RPGC --effectiveGenomeSize ${mappableGenome} -p ${threads}"
 echo "=== ${me}: Running: ${command}"
 eval $command
 rc=$?
