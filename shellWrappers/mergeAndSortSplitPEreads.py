@@ -101,6 +101,7 @@ if __name__ == "__main__":
     readObject = solidRead if "--solid" in sys.argv else illuminaRead
     matched = 0
     counter = 0
+    paired = set([])
     with myopen(outfileNameR1, 'w') as outR1, myopen(outfileNameR2, 'w') as outR2, myopen(outfileNameUP, 'w') as outUP:
         iterR1 = fastqIter(infileNameR1, readObject)
         while True:
@@ -119,8 +120,28 @@ if __name__ == "__main__":
                     matched += 1
                     print >> outR1, R1.pop(read.name)
                     print >> outR2, read
-                else:
-                    print >> outUP, read
+                    paired.add(read.name)
+                #else:
+                    #print >> outUP, read # only works if all in memory
             for rn, read in R1.items():
                 print >> outUP, read
+        # write out the unpairable reverse reads
+        iterR2 = fastqIter(infileNameR2, readObject)
+        while True:
+            try:
+                read = iterR2.next()
+            except:
+                break
+            if read.name not in paired:
+                print >> outUP, read
+        
     print >> sys.stderr, "matched %d pairs" % matched
+
+
+
+
+
+
+
+
+
